@@ -1,13 +1,15 @@
 import { motion } from "framer-motion";
-import heroBg from "@/assets/hero-bg.jpg";
+import { Link } from "react-router-dom";
 
 const HeroSection = () => {
   return (
-    <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0">
-        <img src={heroBg} alt="" className="w-full h-full object-cover" width={1920} height={1080} />
-        <div className="absolute inset-0 bg-background/70" />
+    <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden bg-muted/30">
+      {/* Abstract geometric background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-20 right-20 w-96 h-96 rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute bottom-20 left-20 w-80 h-80 rounded-full bg-primary/8 blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full border border-border/40" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full border border-border/20" />
       </div>
 
       {/* Content */}
@@ -34,12 +36,12 @@ const HeroSection = () => {
             >
               Our Expertise
             </a>
-            <a
-              href="#contact"
+            <Link
+              to="/contact"
               className="inline-flex items-center px-8 py-3 rounded-lg border border-border text-foreground font-display font-semibold text-sm hover:border-primary hover:text-primary transition-colors"
             >
               Get in Touch
-            </a>
+            </Link>
           </div>
         </motion.div>
       </div>

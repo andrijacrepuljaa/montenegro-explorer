@@ -2,9 +2,9 @@ import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import AboutSection from "@/components/AboutSection";
 import ExpertiseSection from "@/components/ExpertiseSection";
-import InteractiveMap from "@/components/InteractiveMap";
+import InteractiveGlobe from "@/components/InteractiveGlobe";
+import MilestonesSection from "@/components/MilestonesSection";
 import CareersSection from "@/components/CareersSection";
-import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 
 const Index = () => (
@@ -13,9 +13,9 @@ const Index = () => (
     <HeroSection />
     <AboutSection />
     <ExpertiseSection />
-    <InteractiveMap />
+    <InteractiveGlobe />
+    <MilestonesSection />
     <CareersSection />
-    <ContactSection />
     <Footer />
   </div>
 );
