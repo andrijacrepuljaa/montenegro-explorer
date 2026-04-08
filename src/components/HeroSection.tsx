@@ -1,61 +1,66 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 
 const HeroSection = () => {
   return (
-    <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden bg-muted/30">
-      {/* Abstract geometric background */}
+    <section id="hero" className="relative min-h-[90vh] flex items-center section-dark overflow-hidden">
+      {/* Geometric accent */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 right-20 w-96 h-96 rounded-full bg-primary/5 blur-3xl" />
-        <div className="absolute bottom-20 left-20 w-80 h-80 rounded-full bg-primary/8 blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full border border-border/40" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full border border-border/20" />
+        <div className="absolute -right-20 -top-20 w-[600px] h-[600px] rounded-full bg-primary/10 blur-[120px]" />
+        <div className="absolute left-0 bottom-0 w-full h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 container mx-auto px-6 text-center">
+      <div className="relative z-10 max-w-[1400px] mx-auto px-6 lg:px-12 py-32 w-full">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
+          transition={{ duration: 0.7, delay: 0.1 }}
+          className="max-w-4xl"
         >
-          <p className="text-primary font-display text-sm uppercase tracking-[0.3em] mb-6">
-            Management Consulting · Montenegro
-          </p>
-          <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold leading-tight max-w-5xl mx-auto mb-6">
-            Empowering Businesses Through{" "}
-            <span className="text-gradient">Integrated Solutions</span>
+          <div className="accent-bar mb-8" />
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight mb-6">
+            Empowering Businesses Through Integrated Solutions
           </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
+          <p className="text-lg md:text-xl text-white/70 max-w-2xl mb-10 leading-relaxed">
             Supply Chain Excellence, Digital Mastery, and Project Success — insightful strategies across operations, marketing and execution.
           </p>
-          <div className="flex gap-4 justify-center flex-wrap">
+          <div className="flex gap-4 flex-wrap">
             <a
               href="#expertise"
-              className="inline-flex items-center px-8 py-3 rounded-lg bg-primary text-primary-foreground font-display font-semibold text-sm hover:opacity-90 transition-opacity"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity"
             >
               Our Expertise
+              <ArrowRight className="w-4 h-4" />
             </a>
             <Link
               to="/contact"
-              className="inline-flex items-center px-8 py-3 rounded-lg border border-border text-foreground font-display font-semibold text-sm hover:border-primary hover:text-primary transition-colors"
+              className="inline-flex items-center gap-2 px-8 py-3.5 border border-white/30 text-white font-semibold text-sm hover:bg-white/10 transition-colors"
             >
               Get in Touch
             </Link>
           </div>
         </motion.div>
-      </div>
 
-      {/* Scroll indicator */}
-      <motion.div
-        className="absolute bottom-10 left-1/2 -translate-x-1/2"
-        animate={{ y: [0, 10, 0] }}
-        transition={{ repeat: Infinity, duration: 2 }}
-      >
-        <div className="w-6 h-10 rounded-full border-2 border-muted-foreground/30 flex items-start justify-center p-2">
-          <div className="w-1 h-2 rounded-full bg-primary" />
-        </div>
-      </motion.div>
+        {/* Stat banner */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
+          className="mt-20 flex flex-wrap gap-12 md:gap-20"
+        >
+          {[
+            { num: "7+", label: "Years of Excellence" },
+            { num: "15+", label: "Countries Served" },
+            { num: "50+", label: "Projects Delivered" },
+          ].map((s) => (
+            <div key={s.label}>
+              <p className="text-3xl md:text-5xl font-bold text-primary mb-1">{s.num}</p>
+              <p className="text-sm text-white/50 uppercase tracking-wider">{s.label}</p>
+            </div>
+          ))}
+        </motion.div>
+      </div>
     </section>
   );
 };
