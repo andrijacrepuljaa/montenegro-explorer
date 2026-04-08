@@ -1,79 +1,80 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { Rocket, Users, BookOpen, Award, Network, Briefcase } from "lucide-react";
+import { GraduationCap, Globe, Rocket, Coffee } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 
 const perks = [
-  { icon: Rocket, title: "Professional Growth", desc: "Hands-on experience in a dynamic work environment." },
-  { icon: Users, title: "Dynamic & Flexible", desc: "Collaboration and creativity with optimal work-life mix." },
-  { icon: BookOpen, title: "Mentorship", desc: "Work closely with industry professionals." },
-  { icon: Award, title: "Remuneration", desc: "Some interns may be awarded compensation." },
-  { icon: Network, title: "Networking", desc: "Build valuable industry connections." },
-  { icon: Briefcase, title: "Career Advancement", desc: "Successful internships can lead to full-time roles." },
+  { icon: Rocket, title: "Real Projects", desc: "Work on live consulting engagements with international clients." },
+  { icon: GraduationCap, title: "Mentorship", desc: "Learn directly from experienced consultants with global expertise." },
+  { icon: Globe, title: "International Exposure", desc: "Collaborate with teams and clients across multiple countries." },
+  { icon: Coffee, title: "Flexible Environment", desc: "Remote-first culture with a focus on output over hours." },
 ];
 
-const fields = ["Business & Economics", "Organizational Studies", "Logistics & Supply Chain", "Operations Research / Statistics"];
+const fields = [
+  "Supply Chain & Logistics",
+  "Digital Marketing",
+  "Project Management",
+  "Data Analytics",
+  "Business Strategy",
+];
 
 const CareersSection = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section id="careers" className="py-28 bg-secondary/30">
-      <div className="container mx-auto px-6" ref={ref}>
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="max-w-3xl mb-16"
-        >
-          <p className="text-primary font-display text-sm uppercase tracking-[0.2em] mb-3">Careers</p>
-          <h2 className="font-display text-3xl md:text-5xl font-bold mb-6">
-            Join <span className="text-gradient">Our Team</span>
-          </h2>
-          <p className="text-muted-foreground text-lg leading-relaxed">
-            KGC offers a unique opportunity to grow in a highly professional and internationally oriented ambient. We're always looking for ambitious individuals eager to step out of their comfort zones.
-          </p>
-        </motion.div>
-
-        <div className="grid lg:grid-cols-2 gap-12">
-          {/* Internship fields */}
+    <section id="careers" className="section-dark py-24 lg:py-32">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-12" ref={ref}>
+        <div className="grid lg:grid-cols-2 gap-16">
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="rounded-xl p-8 bg-card border border-border"
+            initial={{ opacity: 0, y: 30 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6 }}
           >
-            <h3 className="font-display font-semibold text-xl mb-6">Internship Fields</h3>
-            <div className="space-y-3">
-              {fields.map((f) => (
-                <div key={f} className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-primary" />
-                  <span className="text-sm text-secondary-foreground">{f}</span>
-                </div>
-              ))}
-            </div>
-            <div className="mt-8 pt-6 border-t border-border">
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Preferred candidates: bachelor's or master's students in their final year or graduates up to two years post-graduation with the right to reside and work in Montenegro.
-              </p>
-            </div>
-          </motion.div>
+            <div className="accent-bar mb-6" />
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
+              Careers & Internships
+            </h2>
+            <p className="text-white/60 text-lg mb-8 leading-relaxed">
+              Join our team and build your career in management consulting. We offer internship opportunities for ambitious graduates ready to make an impact.
+            </p>
 
-          {/* Perks grid */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="grid grid-cols-2 gap-4"
-          >
-            {perks.map((p) => (
-              <div key={p.title} className="rounded-xl p-5 bg-card border border-border">
-                <p.icon className="w-5 h-5 text-primary mb-3" />
-                <h4 className="font-display text-sm font-semibold mb-1">{p.title}</h4>
-                <p className="text-xs text-muted-foreground">{p.desc}</p>
+            <div className="mb-8">
+              <h3 className="text-sm uppercase tracking-wider text-white/40 mb-4">Preferred Fields</h3>
+              <div className="flex flex-wrap gap-2">
+                {fields.map((f) => (
+                  <span key={f} className="px-4 py-2 text-sm border border-dark-border text-white/70">
+                    {f}
+                  </span>
+                ))}
               </div>
-            ))}
+            </div>
+
+            <Link
+              to="/contact"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity"
+            >
+              Apply Now
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </motion.div>
+
+          <div className="grid sm:grid-cols-2 gap-6">
+            {perks.map((p, i) => (
+              <motion.div
+                key={p.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.4, delay: 0.15 + i * 0.08 }}
+                className="border border-dark-border p-6 hover:border-primary/40 transition-colors"
+              >
+                <p.icon className="w-7 h-7 text-primary mb-4" />
+                <h3 className="font-semibold text-lg mb-2 text-white">{p.title}</h3>
+                <p className="text-sm text-white/50 leading-relaxed">{p.desc}</p>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

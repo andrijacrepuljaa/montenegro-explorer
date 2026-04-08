@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import kgcLogo from "@/assets/kgc-logo.png";
 
 const navLinks = [
-  { label: "Home", href: "#hero" },
   { label: "About", href: "#about" },
   { label: "Expertise", href: "#expertise" },
   { label: "Global Reach", href: "#map" },
@@ -24,63 +23,67 @@ const Navbar = () => {
   }, []);
 
   return (
-    <motion.nav
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.6 }}
+    <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? "glass py-3 shadow-sm" : "py-5 bg-background/60 backdrop-blur-sm"
+        scrolled
+          ? "bg-background/95 backdrop-blur-md shadow-sm border-b border-border"
+          : "bg-transparent"
       }`}
     >
-      <div className="container mx-auto flex items-center justify-between px-6">
-        <a href="#hero" className="flex items-center gap-2">
-          <img src={kgcLogo} alt="KGC" className="h-8" />
+      <div className="max-w-[1400px] mx-auto flex items-center justify-between px-6 lg:px-12 h-16">
+        <a href="#hero" className="flex items-center">
+          <img
+            src={kgcLogo}
+            alt="KGC"
+            className={`h-8 transition-all ${scrolled ? "" : "brightness-0 invert"}`}
+          />
         </a>
 
-        {/* Desktop */}
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
             <a
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+              className={`text-sm font-medium transition-colors ${
+                scrolled
+                  ? "text-foreground hover:text-primary"
+                  : "text-white/80 hover:text-white"
+              }`}
             >
               {link.label}
             </a>
           ))}
           <Link
             to="/contact"
-            className="inline-flex items-center px-5 py-2 rounded-lg bg-primary text-primary-foreground font-display font-semibold text-sm hover:opacity-90 transition-opacity"
+            className="inline-flex items-center px-5 py-2 rounded bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity"
           >
             Contact Us
           </Link>
         </div>
 
-        {/* Mobile toggle */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden text-foreground"
+          className={`md:hidden ${scrolled ? "text-foreground" : "text-white"}`}
         >
           {mobileOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
 
-      {/* Mobile menu */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="glass md:hidden"
+            className="bg-background border-b border-border md:hidden"
           >
-            <div className="flex flex-col gap-4 px-6 py-6">
+            <div className="flex flex-col gap-1 px-6 py-4">
               {navLinks.map((link) => (
                 <a
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                  className="text-sm font-medium text-foreground hover:text-primary py-2 transition-colors"
                 >
                   {link.label}
                 </a>
@@ -88,7 +91,7 @@ const Navbar = () => {
               <Link
                 to="/contact"
                 onClick={() => setMobileOpen(false)}
-                className="text-sm font-medium text-primary"
+                className="text-sm font-semibold text-primary py-2"
               >
                 Contact Us
               </Link>
@@ -96,7 +99,7 @@ const Navbar = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.nav>
+    </nav>
   );
 };
 
