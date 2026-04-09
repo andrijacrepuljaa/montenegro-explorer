@@ -1,20 +1,63 @@
-import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { motion, useInView, AnimatePresence } from "framer-motion";
+import { useRef, useState } from "react";
 
 const milestones = [
-  { year: "2017", title: "Founded", description: "KGC established in Tivat, Montenegro as a management consulting firm.", teamSize: 1 },
-  { year: "2018", title: "First International Projects", description: "Partnered with leading European consulting firms on supply chain engagements.", teamSize: 2 },
-  { year: "2019", title: "Expanding Expertise", description: "Added digital marketing and project management to our service portfolio.", teamSize: 4 },
-  { year: "2020", title: "Remote-First Pivot", description: "Successfully transitioned to remote consulting, expanding our global client base.", teamSize: 5 },
-  { year: "2021", title: "Industry Recognition", description: "Delivered projects across automotive, pharma, retail and consumer goods sectors.", teamSize: 7 },
-  { year: "2022", title: "Internship Programme", description: "Launched structured internship programme for emerging talent in Montenegro.", teamSize: 9 },
-  { year: "2023", title: "Growing Impact", description: "Expanded client base across 15+ countries with a focus on supply chain network design.", teamSize: 12 },
-  { year: "2024", title: "Scaling Operations", description: "Strengthened partnerships and deepened expertise in data-driven consulting.", teamSize: 15 },
+  {
+    year: "2024",
+    title: "Scaling Operations",
+    description: "Strengthened partnerships and deepened expertise in data-driven consulting.",
+    highlights: ["15 team members", "Expanded client base across 15+ countries", "Focus on supply chain network design"],
+  },
+  {
+    year: "2023",
+    title: "Growing Impact",
+    description: "Expanded international reach with a growing portfolio of complex engagements.",
+    highlights: ["12 team members", "Projects in 15+ countries", "Supply chain network design focus"],
+  },
+  {
+    year: "2022",
+    title: "Internship Programme",
+    description: "Launched a structured internship programme for emerging talent in Montenegro.",
+    highlights: ["9 team members", "First intern cohort", "Talent pipeline established"],
+  },
+  {
+    year: "2021",
+    title: "Industry Recognition",
+    description: "Delivered projects across automotive, pharma, retail and consumer goods sectors.",
+    highlights: ["7 team members", "Multi-sector delivery", "European partner network"],
+  },
+  {
+    year: "2020",
+    title: "Remote-First Pivot",
+    description: "Successfully transitioned to remote consulting, expanding our global client base.",
+    highlights: ["5 team members", "Remote-first operations", "Global client expansion"],
+  },
+  {
+    year: "2019",
+    title: "Expanding Expertise",
+    description: "Added digital marketing and project management to our service portfolio.",
+    highlights: ["4 team members", "New service lines", "Broader consulting scope"],
+  },
+  {
+    year: "2018",
+    title: "First International Projects",
+    description: "Partnered with leading European consulting firms on supply chain engagements.",
+    highlights: ["2 team members", "European partnerships", "Supply chain focus"],
+  },
+  {
+    year: "2017",
+    title: "Founded",
+    description: "KGC established in Tivat, Montenegro as a management consulting firm.",
+    highlights: ["1 founder", "Tivat, Montenegro", "Vision set in motion"],
+  },
 ];
 
 const MilestonesSection = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
+  const [activeYear, setActiveYear] = useState("2024");
+
+  const activeMilestone = milestones.find((m) => m.year === activeYear)!;
 
   return (
     <section id="milestones" className="py-24 lg:py-32">
@@ -26,34 +69,79 @@ const MilestonesSection = () => {
           className="max-w-2xl mb-16"
         >
           <div className="accent-bar mb-6" />
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">Our Journey</h2>
+          <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
+            Milestones That Made Us KGC
+          </h2>
           <p className="text-muted-foreground text-lg">
-            From a solo founder to a growing international team — year by year growth.
+            From a solo founder to a growing international team — our journey year by year.
           </p>
         </motion.div>
 
-        {/* Horizontal timeline */}
-        <div className="relative">
-          <div className="absolute top-[28px] left-0 right-0 h-px bg-border" />
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-0">
-            {milestones.map((m, i) => (
-              <motion.div
+        <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-16">
+          {/* Year selector - vertical list */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={inView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0"
+          >
+            {milestones.map((m) => (
+              <button
                 key={m.year}
-                initial={{ opacity: 0, y: 20 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.4, delay: i * 0.08 }}
-                className="relative pt-14 px-3 group"
+                onClick={() => setActiveYear(m.year)}
+                className={`relative text-left px-5 py-3.5 text-lg font-bold transition-all whitespace-nowrap flex-shrink-0 ${
+                  activeYear === m.year
+                    ? "text-primary bg-primary/5 border-l-4 border-primary"
+                    : "text-muted-foreground hover:text-foreground border-l-4 border-transparent hover:border-border"
+                }`}
               >
-                {/* Dot */}
-                <div className="absolute top-[22px] left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-primary border-2 border-background z-10 group-hover:scale-150 transition-transform" />
-                <p className="text-primary font-bold text-lg mb-1">{m.year}</p>
-                <h3 className="font-semibold text-sm mb-2">{m.title}</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed mb-2">{m.description}</p>
-                <p className="text-xs text-muted-foreground">
-                  Team: <span className="font-bold text-foreground">{m.teamSize}</span>
-                </p>
-              </motion.div>
+                <span className="block text-2xl">{m.year}</span>
+                <span
+                  className={`block text-xs font-medium mt-0.5 transition-colors ${
+                    activeYear === m.year ? "text-primary/70" : "text-muted-foreground/60"
+                  }`}
+                >
+                  {m.title}
+                </span>
+              </button>
             ))}
+          </motion.div>
+
+          {/* Content panel */}
+          <div className="min-h-[300px]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeYear}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.35 }}
+                className="border border-border p-8 lg:p-12"
+              >
+                <div className="mb-8">
+                  <p className="text-primary font-bold text-6xl lg:text-8xl mb-4 leading-none">
+                    {activeMilestone.year}
+                  </p>
+                  <h3 className="text-2xl lg:text-3xl font-bold mb-4">
+                    {activeMilestone.title}
+                  </h3>
+                  <p className="text-muted-foreground text-lg leading-relaxed max-w-xl">
+                    {activeMilestone.description}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  {activeMilestone.highlights.map((h) => (
+                    <span
+                      key={h}
+                      className="px-4 py-2 text-sm border border-border text-muted-foreground"
+                    >
+                      {h}
+                    </span>
+                  ))}
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
         </div>
       </div>

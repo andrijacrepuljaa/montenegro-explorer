@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Mail, MapPin, Linkedin, Send, ArrowLeft } from "lucide-react";
+import { Mail, MapPin, Linkedin, Send, ArrowLeft, Paperclip, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { z } from "zod";
 import kgcLogo from "@/assets/kgc-logo.png";
@@ -15,6 +15,13 @@ const contactSchema = z.object({
 
 type ContactForm = z.infer<typeof contactSchema>;
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ACCEPTED_FILE_TYPES = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+];
+
 const Contact = () => {
   const [form, setForm] = useState<ContactForm>({
     name: "",
@@ -23,19 +30,43 @@ const Contact = () => {
     subject: "",
     message: "",
   });
-  const [errors, setErrors] = useState<Partial<Record<keyof ContactForm, string>>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof ContactForm | "cv", string>>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [cvFile, setCvFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleChange = (field: keyof ContactForm, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!ACCEPTED_FILE_TYPES.includes(file.type)) {
+      setErrors((prev) => ({ ...prev, cv: "Please upload a PDF or Word document" }));
+      return;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      setErrors((prev) => ({ ...prev, cv: "File size must be under 5MB" }));
+      return;
+    }
+
+    setCvFile(file);
+    setErrors((prev) => ({ ...prev, cv: undefined }));
+  };
+
+  const removeFile = () => {
+    setCvFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const result = contactSchema.safeParse(form);
     if (!result.success) {
-      const fieldErrors: Partial<Record<keyof ContactForm, string>> = {};
+      const fieldErrors: Partial<Record<keyof ContactForm | "cv", string>> = {};
       result.error.issues.forEach((issue) => {
         const field = issue.path[0] as keyof ContactForm;
         fieldErrors[field] = issue.message;
@@ -43,6 +74,7 @@ const Contact = () => {
       setErrors(fieldErrors);
       return;
     }
+    // In production this would send via email API
     setSubmitted(true);
   };
 
@@ -122,6 +154,7 @@ const Contact = () => {
                     onClick={() => {
                       setSubmitted(false);
                       setForm({ name: "", email: "", company: "", subject: "", message: "" });
+                      setCvFile(null);
                     }}
                     className="text-sm text-primary hover:underline"
                   >
@@ -158,6 +191,43 @@ const Contact = () => {
                     <textarea value={form.message} onChange={(e) => handleChange("message", e.target.value)} rows={6} className={`${inputClass} resize-none`} placeholder="Tell us about your project or inquiry..." />
                     {errors.message && <p className="text-destructive text-xs mt-1">{errors.message}</p>}
                   </div>
+
+                  {/* CV Upload */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1.5">
+                      Attach CV <span className="text-muted-foreground font-normal">(optional, PDF or Word, max 5MB)</span>
+                    </label>
+                    {cvFile ? (
+                      <div className="flex items-center gap-3 px-4 py-3 border border-border bg-muted/30">
+                        <Paperclip className="w-4 h-4 text-primary flex-shrink-0" />
+                        <span className="text-sm truncate flex-1">{cvFile.name}</span>
+                        <span className="text-xs text-muted-foreground flex-shrink-0">
+                          {(cvFile.size / 1024).toFixed(0)} KB
+                        </span>
+                        <button type="button" onClick={removeFile} className="p-1 hover:bg-muted transition-colors">
+                          <X className="w-4 h-4 text-muted-foreground" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full px-4 py-3 border border-dashed border-border text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors flex items-center gap-2 justify-center"
+                      >
+                        <Paperclip className="w-4 h-4" />
+                        Click to attach your CV
+                      </button>
+                    )}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                    {errors.cv && <p className="text-destructive text-xs mt-1">{errors.cv}</p>}
+                  </div>
+
                   <button
                     type="submit"
                     className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity"
