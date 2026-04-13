@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Pencil, Trash2, Plus, LogOut, ChevronDown, ChevronUp } from "lucide-react";
+import { Pencil, Trash2, Plus, LogOut } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import kgcLogo from "@/assets/kgc-logo.png";
 
@@ -94,13 +94,26 @@ const Admin = () => {
 
   const save = async () => {
     setSaving(true);
-    const table = activeTab === "milestones" ? "milestones" : activeTab === "services" ? "services" : "career_openings";
-    const { id, created_at, updated_at, ...data } = formData;
+    const { id: _id, created_at: _ca, updated_at: _ua, ...data } = formData;
 
-    if (editing === "new") {
-      await supabase.from(table).insert(data);
+    if (activeTab === "milestones") {
+      if (editing === "new") {
+        await supabase.from("milestones").insert(data as any);
+      } else {
+        await supabase.from("milestones").update(data as any).eq("id", editing!);
+      }
+    } else if (activeTab === "services") {
+      if (editing === "new") {
+        await supabase.from("services").insert(data as any);
+      } else {
+        await supabase.from("services").update(data as any).eq("id", editing!);
+      }
     } else {
-      await supabase.from(table).update(data).eq("id", editing);
+      if (editing === "new") {
+        await supabase.from("career_openings").insert(data as any);
+      } else {
+        await supabase.from("career_openings").update(data as any).eq("id", editing!);
+      }
     }
 
     setEditing(null);
