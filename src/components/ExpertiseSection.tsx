@@ -1,5 +1,6 @@
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Network, Warehouse, PackageSearch, DollarSign, ClipboardCheck, ShieldAlert, Megaphone, Palette, ArrowRight, X, ChevronRight } from "lucide-react";
 
 const services = [
@@ -120,6 +121,7 @@ const services = [
 const ExpertiseSection = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
+  const navigate = useNavigate();
   const [expandedService, setExpandedService] = useState<number | null>(null);
 
   return (
@@ -221,13 +223,16 @@ const ExpertiseSection = () => {
                       </div>
                     </div>
 
-                    <a
-                      href="/contact"
+                    <button
+                      onClick={() => {
+                        setExpandedService(null);
+                        navigate("/contact");
+                      }}
                       className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity"
                     >
                       Discuss This Service
                       <ArrowRight className="w-4 h-4" />
-                    </a>
+                    </button>
                   </div>
                 );
               })()}
