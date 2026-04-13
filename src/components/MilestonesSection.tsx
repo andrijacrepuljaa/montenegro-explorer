@@ -1,63 +1,41 @@
 import { motion, useInView, AnimatePresence } from "framer-motion";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
-const milestones = [
-  {
-    year: "2024",
-    title: "Scaling Operations",
-    description: "Strengthened partnerships and deepened expertise in data-driven consulting.",
-    highlights: ["15 team members", "Expanded client base across 15+ countries", "Focus on supply chain network design"],
-  },
-  {
-    year: "2023",
-    title: "Growing Impact",
-    description: "Expanded international reach with a growing portfolio of complex engagements.",
-    highlights: ["12 team members", "Projects in 15+ countries", "Supply chain network design focus"],
-  },
-  {
-    year: "2022",
-    title: "Internship Programme",
-    description: "Launched a structured internship programme for emerging talent in Montenegro.",
-    highlights: ["9 team members", "First intern cohort", "Talent pipeline established"],
-  },
-  {
-    year: "2021",
-    title: "Industry Recognition",
-    description: "Delivered projects across automotive, pharma, retail and consumer goods sectors.",
-    highlights: ["7 team members", "Multi-sector delivery", "European partner network"],
-  },
-  {
-    year: "2020",
-    title: "Remote-First Pivot",
-    description: "Successfully transitioned to remote consulting, expanding our global client base.",
-    highlights: ["5 team members", "Remote-first operations", "Global client expansion"],
-  },
-  {
-    year: "2019",
-    title: "Expanding Expertise",
-    description: "Added digital marketing and project management to our service portfolio.",
-    highlights: ["4 team members", "New service lines", "Broader consulting scope"],
-  },
-  {
-    year: "2018",
-    title: "First International Projects",
-    description: "Partnered with leading European consulting firms on supply chain engagements.",
-    highlights: ["2 team members", "European partnerships", "Supply chain focus"],
-  },
-  {
-    year: "2017",
-    title: "Founded",
-    description: "KGC established in Tivat, Montenegro as a management consulting firm.",
-    highlights: ["1 founder", "Tivat, Montenegro", "Vision set in motion"],
-  },
+interface Milestone {
+  year: string;
+  title: string;
+  description: string;
+  highlights: string[];
+}
+
+const fallbackMilestones: Milestone[] = [
+  { year: "2024", title: "Scaling Operations", description: "Strengthened partnerships and deepened expertise in data-driven consulting.", highlights: ["15 team members", "Expanded client base across 15+ countries", "Focus on supply chain network design"] },
+  { year: "2023", title: "Growing Impact", description: "Expanded international reach with a growing portfolio of complex engagements.", highlights: ["12 team members", "Projects in 15+ countries", "Supply chain network design focus"] },
+  { year: "2022", title: "Internship Programme", description: "Launched a structured internship programme for emerging talent in Montenegro.", highlights: ["9 team members", "First intern cohort", "Talent pipeline established"] },
+  { year: "2021", title: "Industry Recognition", description: "Delivered projects across automotive, pharma, retail and consumer goods sectors.", highlights: ["7 team members", "Multi-sector delivery", "European partner network"] },
+  { year: "2020", title: "Remote-First Pivot", description: "Successfully transitioned to remote consulting, expanding our global client base.", highlights: ["5 team members", "Remote-first operations", "Global client expansion"] },
+  { year: "2019", title: "Expanding Expertise", description: "Added digital marketing and project management to our service portfolio.", highlights: ["4 team members", "New service lines", "Broader consulting scope"] },
+  { year: "2018", title: "First International Projects", description: "Partnered with leading European consulting firms on supply chain engagements.", highlights: ["2 team members", "European partnerships", "Supply chain focus"] },
+  { year: "2017", title: "Founded", description: "KGC established in Tivat, Montenegro as a management consulting firm.", highlights: ["1 founder", "Tivat, Montenegro", "Vision set in motion"] },
 ];
 
 const MilestonesSection = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
+  const [milestones, setMilestones] = useState<Milestone[]>(fallbackMilestones);
   const [activeYear, setActiveYear] = useState("2024");
 
-  const activeMilestone = milestones.find((m) => m.year === activeYear)!;
+  useEffect(() => {
+    supabase.from("milestones").select("*").order("sort_order", { ascending: false }).then(({ data }) => {
+      if (data && data.length > 0) {
+        setMilestones(data);
+        setActiveYear(data[0].year);
+      }
+    });
+  }, []);
+
+  const activeMilestone = milestones.find((m) => m.year === activeYear) || milestones[0];
 
   return (
     <section id="milestones" className="py-24 lg:py-32">
@@ -78,7 +56,6 @@ const MilestonesSection = () => {
         </motion.div>
 
         <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-16">
-          {/* Year selector - vertical list */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
@@ -96,18 +73,13 @@ const MilestonesSection = () => {
                 }`}
               >
                 <span className="block text-2xl">{m.year}</span>
-                <span
-                  className={`block text-xs font-medium mt-0.5 transition-colors ${
-                    activeYear === m.year ? "text-primary/70" : "text-muted-foreground/60"
-                  }`}
-                >
+                <span className={`block text-xs font-medium mt-0.5 transition-colors ${activeYear === m.year ? "text-primary/70" : "text-muted-foreground/60"}`}>
                   {m.title}
                 </span>
               </button>
             ))}
           </motion.div>
 
-          {/* Content panel */}
           <div className="min-h-[300px]">
             <AnimatePresence mode="wait">
               <motion.div
@@ -119,25 +91,13 @@ const MilestonesSection = () => {
                 className="border border-border p-8 lg:p-12"
               >
                 <div className="mb-8">
-                  <p className="text-primary font-bold text-6xl lg:text-8xl mb-4 leading-none">
-                    {activeMilestone.year}
-                  </p>
-                  <h3 className="text-2xl lg:text-3xl font-bold mb-4">
-                    {activeMilestone.title}
-                  </h3>
-                  <p className="text-muted-foreground text-lg leading-relaxed max-w-xl">
-                    {activeMilestone.description}
-                  </p>
+                  <p className="text-primary font-bold text-6xl lg:text-8xl mb-4 leading-none">{activeMilestone.year}</p>
+                  <h3 className="text-2xl lg:text-3xl font-bold mb-4">{activeMilestone.title}</h3>
+                  <p className="text-muted-foreground text-lg leading-relaxed max-w-xl">{activeMilestone.description}</p>
                 </div>
-
                 <div className="flex flex-wrap gap-3">
                   {activeMilestone.highlights.map((h) => (
-                    <span
-                      key={h}
-                      className="px-4 py-2 text-sm border border-border text-muted-foreground"
-                    >
-                      {h}
-                    </span>
+                    <span key={h} className="px-4 py-2 text-sm border border-border text-muted-foreground">{h}</span>
                   ))}
                 </div>
               </motion.div>
