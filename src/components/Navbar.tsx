@@ -76,7 +76,12 @@ const Navbar = () => {
 
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className={`md:hidden ${scrolled ? "text-foreground" : "text-white"}`}
+          className={`md:hidden p-2 -mr-2 focus:outline-none focus:ring-2 focus:ring-primary ${
+            scrolled ? "text-foreground" : "text-white"
+          }`}
+          aria-label={mobileOpen ? "Close navigation" : "Open navigation"}
+          aria-expanded={mobileOpen}
+          aria-controls="mobile-navigation"
         >
           {mobileOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -85,6 +90,7 @@ const Navbar = () => {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
+            id="mobile-navigation"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}

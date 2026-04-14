@@ -13,7 +13,7 @@ const careerPerks = [
 ];
 
 const internPerks = [
-  { icon: Rocket, title: "Real Projects", desc: "Work on live consulting engagements — not busy work. Your contributions will have real impact." },
+  { icon: Rocket, title: "Real Projects", desc: "Work on live consulting engagements, not busy work. Your contributions will have real impact." },
   { icon: GraduationCap, title: "Structured Mentorship", desc: "Learn directly from experienced consultants with dedicated 1:1 mentoring sessions." },
   { icon: Globe, title: "Global Perspective", desc: "Gain exposure to international business practices and cross-border consulting." },
   { icon: Coffee, title: "Flexible & Remote", desc: "Work remotely with flexible hours, designed to fit alongside your studies or other commitments." },
@@ -106,7 +106,16 @@ const Careers = () => {
             <div className="mb-12 sm:mb-16">
               <h2 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8">Open Positions</h2>
               {careerOpenings.length === 0 ? (
-                <p className="text-muted-foreground text-sm">No open positions at the moment. Check back soon or send us your CV!</p>
+                <div className="border border-border p-5 sm:p-6">
+                  <h3 className="font-semibold text-base sm:text-lg mb-2">No active openings right now</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed mb-4 max-w-2xl">
+                    We still review strong profiles in supply chain, project management, digital marketing, data analytics, and business strategy.
+                    Send your CV and a short note so we can keep you in mind for the right future role.
+                  </p>
+                  <Link to="/contact" className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity">
+                    Join Talent Pool <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
               ) : (
                 <div className="space-y-4">
                   {careerOpenings.map((job, i) => (
@@ -152,7 +161,7 @@ const Careers = () => {
                   Our structured internship programme offers ambitious graduates the opportunity to gain real-world consulting experience alongside seasoned professionals.
                 </p>
                 <p className="text-muted-foreground leading-relaxed mb-6 sm:mb-8 text-sm sm:text-base">
-                  Interns at KGC work on live client projects, participate in training sessions, and receive dedicated mentorship. It's not an observation role — you'll be an active contributor from day one.
+                  Interns at KGC work on live client projects, participate in training sessions, and receive dedicated mentorship. It's not an observation role; you'll be an active contributor from day one.
                 </p>
 
                 {internOpenings.length > 0 && (

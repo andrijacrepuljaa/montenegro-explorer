@@ -1,6 +1,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { Mail, MapPin, Linkedin } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Mail, MapPin, Linkedin, ArrowRight } from "lucide-react";
 
 const ContactSection = () => {
   const ref = useRef(null);
@@ -17,11 +18,14 @@ const ContactSection = () => {
         >
           <p className="text-primary font-display text-sm uppercase tracking-[0.2em] mb-3">Contact</p>
           <h2 className="font-display text-2xl sm:text-3xl md:text-5xl font-bold mb-4 sm:mb-6">
-            Let's Write Your Next <span className="text-gradient">Success Story</span>
+            Ready to Discuss a Project?
           </h2>
           <p className="text-muted-foreground text-base sm:text-lg mb-8 sm:mb-12">
-            We want to hear from you. Contact us to discuss how we can help transform your business.
+            Share the challenge, timeline, and outcome you are aiming for. We will help you find the right next step.
           </p>
+          <Link to="/contact" className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity mb-8 sm:mb-12">
+            Start a Conversation <ArrowRight className="w-4 h-4" />
+          </Link>
         </motion.div>
 
         <motion.div
@@ -30,17 +34,17 @@ const ContactSection = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="grid sm:grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto"
         >
-          <a href="mailto:info@kgc.co.me" className="flex flex-col items-center gap-3 rounded-xl p-6 sm:p-8 bg-card border border-border hover:border-primary/40 transition-all group">
+          <a href="mailto:info@kgc.co.me" className="flex flex-col items-center gap-3 rounded-lg p-6 sm:p-8 bg-card border border-border hover:border-primary/40 transition-all group">
             <Mail className="w-7 sm:w-8 h-7 sm:h-8 text-primary" />
             <span className="font-display text-sm font-semibold">Email Us</span>
             <span className="text-xs text-muted-foreground">info@kgc.co.me</span>
           </a>
-          <div className="flex flex-col items-center gap-3 rounded-xl p-6 sm:p-8 bg-card border border-border">
+          <div className="flex flex-col items-center gap-3 rounded-lg p-6 sm:p-8 bg-card border border-border">
             <MapPin className="w-7 sm:w-8 h-7 sm:h-8 text-primary" />
             <span className="font-display text-sm font-semibold">Visit Us</span>
             <span className="text-xs text-muted-foreground text-center">Arsenal Business Club, Seljanovo B.B., Tivat, Montenegro</span>
           </div>
-          <a href="https://www.linkedin.com/in/velibor-kastratovic/" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-3 rounded-xl p-6 sm:p-8 bg-card border border-border hover:border-primary/40 transition-all group">
+          <a href="https://www.linkedin.com/in/velibor-kastratovic/" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-3 rounded-lg p-6 sm:p-8 bg-card border border-border hover:border-primary/40 transition-all group">
             <Linkedin className="w-7 sm:w-8 h-7 sm:h-8 text-primary" />
             <span className="font-display text-sm font-semibold">LinkedIn</span>
             <span className="text-xs text-muted-foreground">Connect with us</span>

@@ -2,9 +2,10 @@ import { motion, useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Network, Warehouse, PackageSearch, DollarSign, ClipboardCheck, ShieldAlert, Megaphone, Palette, BarChart3, Target, Lightbulb, TrendingUp, ArrowRight, X, ChevronRight } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-const iconMap: Record<string, any> = {
+const iconMap: Record<string, LucideIcon> = {
   Network, Warehouse, PackageSearch, DollarSign, ClipboardCheck, ShieldAlert, Megaphone, Palette, BarChart3, Target, Lightbulb, TrendingUp,
 };
 
@@ -18,6 +19,27 @@ const fallbackServices = [
   { icon: Megaphone, title: "Marketing Strategy Development", short: "Discover how to maximize your market presence.", detail: "Crafting cohesive strategies that resonate with your target audience, leverage the right channels, and maximize your ROI.", benefits: ["Market analysis & positioning", "Channel strategy & mix", "Campaign planning & ROI", "Digital presence audit", "Competitive benchmarking"], category: "Digital Marketing" },
   { icon: Palette, title: "Brand Positioning & Identity", short: "Solidify your brand's identity and message.", detail: "Building a distinctive brand that stands out in the market and connects authentically with your customers.", benefits: ["Brand audit & assessment", "Visual identity guidelines", "Messaging framework", "Brand architecture", "Customer perception analysis"], category: "Digital Marketing" },
 ];
+
+const allowedCategories = new Set(["Supply Chain", "Project Management", "Digital Marketing"]);
+
+const isPublishableService = (service: {
+  title: string | null;
+  short: string | null;
+  detail: string | null;
+  category: string | null;
+  benefits: string[] | null;
+}) => {
+  const title = service.title?.trim() ?? "";
+  const hasRequiredContent = Boolean(
+    title &&
+      service.short?.trim() &&
+      service.detail?.trim() &&
+      service.category?.trim() &&
+      service.benefits?.some((benefit) => benefit.trim())
+  );
+
+  return hasRequiredContent && allowedCategories.has(service.category ?? "") && !/^test\b/i.test(title);
+};
 
 const ExpertiseSection = () => {
   const ref = useRef(null);
@@ -33,8 +55,11 @@ const ExpertiseSection = () => {
       .order("sort_order")
       .then(({ data }) => {
         if (data && data.length > 0) {
+          const publishableServices = data.filter(isPublishableService);
+          if (publishableServices.length === 0) return;
+
           setServices(
-            data.map((s) => ({
+            publishableServices.map((s) => ({
               icon: iconMap[s.icon_name] || Network,
               title: s.title,
               short: s.short,
@@ -60,29 +85,31 @@ const ExpertiseSection = () => {
             <div className="accent-bar mb-6" />
             <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold tracking-tight mb-4">What We Deliver</h2>
             <p className="text-white/60 text-base sm:text-lg">
-              The advantage of an integrated approach to consulting — across supply chain, project management, and digital marketing.
+              Practical support across supply chain, project management, and digital marketing, shaped around the outcomes your team needs to deliver.
             </p>
           </motion.div>
 
           {/* Responsive grid: handles any number of cards gracefully */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-dark-border">
             {services.map((s, i) => (
-              <motion.div
+              <motion.button
                 key={s.title}
+                type="button"
                 initial={{ opacity: 0, y: 30 }}
                 animate={inView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.4, delay: i * 0.05 }}
                 onClick={() => setExpandedService(i)}
-                className="cursor-pointer p-6 sm:p-8 bg-hero-bg hover:bg-dark-surface transition-all group relative"
+                className="cursor-pointer p-6 sm:p-8 bg-hero-bg hover:bg-dark-surface focus:bg-dark-surface focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-hero-bg transition-all group relative text-left"
+                aria-haspopup="dialog"
               >
                 <p className="text-xs font-medium text-primary uppercase tracking-wider mb-3 sm:mb-4">{s.category}</p>
                 <s.icon className="w-6 sm:w-7 h-6 sm:h-7 text-white/40 group-hover:text-primary transition-colors mb-4 sm:mb-5" />
                 <h3 className="font-semibold text-base sm:text-lg mb-2 sm:mb-3 text-white">{s.title}</h3>
-                <p className="text-sm text-white/50 leading-relaxed mb-3 sm:mb-4">{s.short}</p>
-                <span className="inline-flex items-center gap-1 text-xs text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                  Learn more <ChevronRight className="w-3 h-3" />
+                <p className="text-sm text-white/65 leading-relaxed mb-3 sm:mb-4">{s.short}</p>
+                <span className="inline-flex items-center gap-1 text-xs text-primary font-medium">
+                  View details <ChevronRight className="w-3 h-3" />
                 </span>
-              </motion.div>
+              </motion.button>
             ))}
           </div>
         </div>

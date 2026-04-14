@@ -24,8 +24,8 @@ const AdminSetup = () => {
       if (res.data?.error) throw new Error(res.data.error);
       setSuccess(true);
       setTimeout(() => navigate("/admin/login"), 2000);
-    } catch (err: any) {
-      setError(err.message || "Setup failed");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Setup failed");
     } finally {
       setLoading(false);
     }

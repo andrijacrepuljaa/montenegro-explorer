@@ -6,7 +6,7 @@ const pillars = [
   { icon: Target, title: "Precision", desc: "Data-driven strategies tailored to your unique challenges and market position." },
   { icon: Lightbulb, title: "Innovation", desc: "Blending proven methodologies with fresh thinking to unlock new opportunities." },
   { icon: TrendingUp, title: "Impact", desc: "Measurable results that drive sustainable growth and operational excellence." },
-  { icon: Users, title: "Partnership", desc: "Collaborative engagement — we work alongside your teams, not in isolation." },
+  { icon: Users, title: "Partnership", desc: "Collaborative engagement with your teams, not work done in isolation." },
 ];
 
 const AboutSection = () => {
@@ -27,10 +27,10 @@ const AboutSection = () => {
               Management Consulting from Montenegro to the World
             </h2>
             <p className="text-muted-foreground text-base sm:text-lg leading-relaxed mb-4 sm:mb-6">
-              KGC d.o.o. is a management consulting firm headquartered in Tivat, Montenegro. We specialize in supply chain consulting, digital marketing strategy, and project management — helping businesses across Europe and beyond optimize their operations and accelerate growth.
+              KGC d.o.o. is a management consulting firm headquartered in Tivat, Montenegro. We specialize in supply chain consulting, digital marketing strategy, and project management, helping businesses across Europe and beyond optimize their operations and accelerate growth.
             </p>
             <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">
-              Our team combines deep industry expertise with a hands-on, collaborative approach. We don't just advise — we embed ourselves in your challenges to deliver measurable, lasting results.
+              Our team combines deep industry expertise with a hands-on, collaborative approach. We do not just advise; we embed ourselves in your challenges to deliver measurable, lasting results.
             </p>
           </motion.div>
 

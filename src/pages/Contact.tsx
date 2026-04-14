@@ -15,6 +15,22 @@ const contactSchema = z.object({
 
 type ContactForm = z.infer<typeof contactSchema>;
 
+const contactEmail = "info@kgc.co.me";
+
+const buildMailtoLink = (form: ContactForm) => {
+  const body = [
+    `Name: ${form.name}`,
+    `Email: ${form.email}`,
+    form.company ? `Company: ${form.company}` : null,
+    "",
+    form.message,
+  ]
+    .filter((line): line is string => line !== null)
+    .join("\n");
+
+  return `mailto:${contactEmail}?subject=${encodeURIComponent(form.subject)}&body=${encodeURIComponent(body)}`;
+};
+
 const Contact = () => {
   const [form, setForm] = useState<ContactForm>({
     name: "", email: "", company: "", subject: "", message: "",
@@ -38,6 +54,7 @@ const Contact = () => {
       setErrors(fieldErrors);
       return;
     }
+    window.location.href = buildMailtoLink(result.data);
     setSubmitted(true);
   };
 
@@ -68,9 +85,9 @@ const Contact = () => {
           </motion.div>
 
           <div className="grid lg:grid-cols-3 gap-8 sm:gap-12">
-            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="space-y-4 sm:space-y-6">
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="order-2 lg:order-1 space-y-4 sm:space-y-6">
               {[
-                { icon: Mail, title: "Email", content: <a href="mailto:info@kgc.co.me" className="text-sm text-muted-foreground hover:text-primary transition-colors">info@kgc.co.me</a> },
+                { icon: Mail, title: "Email", content: <a href={`mailto:${contactEmail}`} className="text-sm text-muted-foreground hover:text-primary transition-colors">{contactEmail}</a> },
                 { icon: MapPin, title: "Office", content: <p className="text-sm text-muted-foreground">Arsenal Business Club<br />Seljanovo B.B., Tivat<br />Montenegro</p> },
                 { icon: Linkedin, title: "LinkedIn", content: <a href="https://www.linkedin.com/in/velibor-kastratovic/" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors">Connect with us</a> },
               ].map(item => (
@@ -82,20 +99,25 @@ const Contact = () => {
               ))}
             </motion.div>
 
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="lg:col-span-2">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="order-1 lg:order-2 lg:col-span-2">
               {submitted ? (
-                <div className="border border-border p-10 sm:p-16 text-center">
+                <div className="border border-border p-10 sm:p-16 text-center" aria-live="polite">
                   <div className="w-14 h-14 bg-primary/10 flex items-center justify-center mx-auto mb-6">
                     <Send className="w-6 h-6 text-primary" />
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-bold mb-3">Message Sent!</h3>
-                  <p className="text-muted-foreground mb-6">Thank you for reaching out. We'll get back to you within 24 hours.</p>
+                  <h3 className="text-xl sm:text-2xl font-bold mb-3">Email Draft Opened</h3>
+                  <p className="text-muted-foreground mb-6">
+                    Your message is ready in your email app. Please review and send it from there.
+                  </p>
                   <button onClick={() => { setSubmitted(false); setForm({ name: "", email: "", company: "", subject: "", message: "" }); }} className="text-sm text-primary hover:underline">
-                    Send another message
+                    Prepare another message
                   </button>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+                  <p className="text-sm text-muted-foreground">
+                    This form opens a prepared email draft so you can review it before sending.
+                  </p>
                   <div className="grid sm:grid-cols-2 gap-4 sm:gap-5">
                     <div>
                       <label className="block text-sm font-medium mb-1.5">Name *</label>
@@ -125,7 +147,7 @@ const Contact = () => {
                     {errors.message && <p className="text-destructive text-xs mt-1">{errors.message}</p>}
                   </div>
                   <button type="submit" className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity">
-                    <Send className="w-4 h-4" /> Send Message
+                    <Send className="w-4 h-4" /> Open Email Draft
                   </button>
                 </form>
               )}

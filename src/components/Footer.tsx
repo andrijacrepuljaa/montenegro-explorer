@@ -8,7 +8,7 @@ const Footer = () => (
         <div className="flex items-center gap-4 sm:gap-6">
           <img src={kgcLogo} alt="KGC" className="h-6" />
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} KGC d.o.o. All rights reserved.
+            &copy; {new Date().getFullYear()} KGC d.o.o. All rights reserved.
           </p>
         </div>
         <div className="flex flex-wrap gap-4 sm:gap-8">

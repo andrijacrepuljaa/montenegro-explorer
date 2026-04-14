@@ -13,6 +13,9 @@ const fallbackMilestones = [
   { year: "2017", title: "Founded", description: "KGC established in Tivat, Montenegro as a management consulting firm.", highlights: ["1 founder", "Tivat, Montenegro", "Vision set in motion"] },
 ];
 
+const sortNewestFirst = <T extends { year: string }>(items: T[]) =>
+  [...items].sort((a, b) => Number.parseInt(b.year, 10) - Number.parseInt(a.year, 10));
+
 const MilestonesSection = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
@@ -26,12 +29,12 @@ const MilestonesSection = () => {
       .order("sort_order")
       .then(({ data }) => {
         if (data && data.length > 0) {
-          const mapped = data.map(d => ({
+          const mapped = sortNewestFirst(data.map(d => ({
             year: d.year,
             title: d.title,
             description: d.description,
             highlights: d.highlights,
-          }));
+          })));
           setMilestones(mapped);
           setActiveYear(mapped[0].year);
         }
@@ -52,7 +55,7 @@ const MilestonesSection = () => {
           <div className="accent-bar mb-6" />
           <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold tracking-tight mb-4">Milestones That Made Us KGC</h2>
           <p className="text-muted-foreground text-base sm:text-lg">
-            From a solo founder to a growing international team — our journey year by year.
+            From a solo founder to a growing international team, our journey year by year.
           </p>
         </motion.div>
 
