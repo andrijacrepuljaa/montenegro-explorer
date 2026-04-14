@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { Network, Warehouse, PackageSearch, DollarSign, ClipboardCheck, ShieldAlert, Megaphone, Palette, BarChart3, Target, Lightbulb, TrendingUp, ArrowRight, X, ChevronRight } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { defaultExpertiseIntro } from "@/lib/cms";
+import { useSiteContent } from "@/hooks/useSiteContent";
 
 const iconMap: Record<string, LucideIcon> = {
   Network, Warehouse, PackageSearch, DollarSign, ClipboardCheck, ShieldAlert, Megaphone, Palette, BarChart3, Target, Lightbulb, TrendingUp,
@@ -47,11 +49,13 @@ const ExpertiseSection = () => {
   const navigate = useNavigate();
   const [expandedService, setExpandedService] = useState<number | null>(null);
   const [services, setServices] = useState(fallbackServices);
+  const intro = useSiteContent("home.expertise", defaultExpertiseIntro);
 
   useEffect(() => {
     supabase
       .from("services")
       .select("*")
+      .eq("is_active", true)
       .order("sort_order")
       .then(({ data }) => {
         if (data && data.length > 0) {
@@ -83,9 +87,9 @@ const ExpertiseSection = () => {
             className="max-w-2xl mb-10 sm:mb-16"
           >
             <div className="accent-bar mb-6" />
-            <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold tracking-tight mb-4">What We Deliver</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold tracking-tight mb-4">{intro.headline}</h2>
             <p className="text-white/60 text-base sm:text-lg">
-              Practical support across supply chain, project management, and digital marketing, shaped around the outcomes your team needs to deliver.
+              {intro.intro}
             </p>
           </motion.div>
 

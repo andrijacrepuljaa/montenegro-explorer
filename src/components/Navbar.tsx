@@ -3,17 +3,66 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import kgcLogo from "@/assets/kgc-logo.png";
+import { defaultHeaderNavigation, type NavigationItem } from "@/lib/cms";
+import { useNavigationItems } from "@/hooks/useSiteContent";
 
-const navLinks = [
-  { label: "About", href: "#about" },
-  { label: "Expertise", href: "#expertise" },
-  { label: "Milestones", href: "#milestones" },
-  { label: "Careers", href: "/careers", isRoute: true },
-];
+const isRoute = (href: string) => href.startsWith("/");
+
+const DesktopNavLink = ({ link, scrolled }: { link: NavigationItem; scrolled: boolean }) => {
+  const className = `text-sm font-medium transition-colors ${
+    scrolled ? "text-foreground hover:text-primary" : "text-white/80 hover:text-white"
+  }`;
+
+  if (link.is_external) {
+    return <a href={link.href} target="_blank" rel="noopener noreferrer" className={className}>{link.label}</a>;
+  }
+
+  return isRoute(link.href) ? (
+    <Link to={link.href} className={className}>{link.label}</Link>
+  ) : (
+    <a href={link.href} className={className}>{link.label}</a>
+  );
+};
+
+const MobileNavLink = ({ link, onClick }: { link: NavigationItem; onClick: () => void }) => {
+  const className = "text-sm font-medium text-foreground hover:text-primary py-2 transition-colors";
+
+  if (link.is_external) {
+    return <a href={link.href} target="_blank" rel="noopener noreferrer" onClick={onClick} className={className}>{link.label}</a>;
+  }
+
+  return isRoute(link.href) ? (
+    <Link to={link.href} onClick={onClick} className={className}>{link.label}</Link>
+  ) : (
+    <a href={link.href} onClick={onClick} className={className}>{link.label}</a>
+  );
+};
+
+const ContactButton = ({ link, onClick }: { link: NavigationItem; onClick?: () => void }) => {
+  const className = onClick
+    ? "text-sm font-semibold text-primary py-2"
+    : "inline-flex items-center px-5 py-2 rounded bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity";
+
+  if (link.is_external) {
+    return <a href={link.href} target="_blank" rel="noopener noreferrer" onClick={onClick} className={className}>{link.label}</a>;
+  }
+
+  return <Link to={link.href} onClick={onClick} className={className}>{link.label}</Link>;
+};
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const navItems = useNavigationItems("header", defaultHeaderNavigation);
+  const contactLink = navItems.find((link) => link.label.toLowerCase().includes("contact")) || {
+    location: "header" as const,
+    label: "Contact Us",
+    href: "/contact",
+    is_external: false,
+    sort_order: 99,
+    is_active: true,
+  };
+  const mainLinks = navItems.filter((link) => !link.label.toLowerCase().includes("contact"));
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -39,39 +88,8 @@ const Navbar = () => {
         </a>
 
         <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) =>
-            link.isRoute ? (
-              <Link
-                key={link.href}
-                to={link.href}
-                className={`text-sm font-medium transition-colors ${
-                  scrolled
-                    ? "text-foreground hover:text-primary"
-                    : "text-white/80 hover:text-white"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ) : (
-              <a
-                key={link.href}
-                href={link.href}
-                className={`text-sm font-medium transition-colors ${
-                  scrolled
-                    ? "text-foreground hover:text-primary"
-                    : "text-white/80 hover:text-white"
-                }`}
-              >
-                {link.label}
-              </a>
-            )
-          )}
-          <Link
-            to="/contact"
-            className="inline-flex items-center px-5 py-2 rounded bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity"
-          >
-            Contact Us
-          </Link>
+          {mainLinks.map((link) => <DesktopNavLink key={`${link.label}-${link.href}`} link={link} scrolled={scrolled} />)}
+          <ContactButton link={contactLink} />
         </div>
 
         <button
@@ -97,34 +115,8 @@ const Navbar = () => {
             className="bg-background border-b border-border md:hidden"
           >
             <div className="flex flex-col gap-1 px-6 py-4">
-              {navLinks.map((link) =>
-                link.isRoute ? (
-                  <Link
-                    key={link.href}
-                    to={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="text-sm font-medium text-foreground hover:text-primary py-2 transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                ) : (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="text-sm font-medium text-foreground hover:text-primary py-2 transition-colors"
-                  >
-                    {link.label}
-                  </a>
-                )
-              )}
-              <Link
-                to="/contact"
-                onClick={() => setMobileOpen(false)}
-                className="text-sm font-semibold text-primary py-2"
-              >
-                Contact Us
-              </Link>
+              {mainLinks.map((link) => <MobileNavLink key={`${link.label}-${link.href}`} link={link} onClick={() => setMobileOpen(false)} />)}
+              <ContactButton link={contactLink} onClick={() => setMobileOpen(false)} />
             </div>
           </motion.div>
         )}

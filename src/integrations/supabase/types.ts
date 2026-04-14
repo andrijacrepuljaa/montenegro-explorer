@@ -7,8 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
@@ -16,11 +14,14 @@ export type Database = {
     Tables: {
       career_openings: {
         Row: {
+          apply_url: string | null
+          closing_date: string | null
           created_at: string
           description: string
           id: string
           is_active: boolean
           location: string
+          requirements: string[]
           sort_order: number
           tab: string
           title: string
@@ -28,11 +29,14 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          apply_url?: string | null
+          closing_date?: string | null
           created_at?: string
           description: string
           id?: string
           is_active?: boolean
           location?: string
+          requirements?: string[]
           sort_order?: number
           tab?: string
           title: string
@@ -40,16 +44,64 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          apply_url?: string | null
+          closing_date?: string | null
           created_at?: string
           description?: string
           id?: string
           is_active?: boolean
           location?: string
+          requirements?: string[]
           sort_order?: number
           tab?: string
           title?: string
           type?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      media_assets: {
+        Row: {
+          alt_text: string | null
+          bucket: string
+          caption: string | null
+          created_at: string
+          height: number | null
+          id: string
+          mime_type: string | null
+          path: string
+          size_bytes: number | null
+          updated_at: string
+          uploaded_by: string | null
+          width: number | null
+        }
+        Insert: {
+          alt_text?: string | null
+          bucket?: string
+          caption?: string | null
+          created_at?: string
+          height?: number | null
+          id?: string
+          mime_type?: string | null
+          path: string
+          size_bytes?: number | null
+          updated_at?: string
+          uploaded_by?: string | null
+          width?: number | null
+        }
+        Update: {
+          alt_text?: string | null
+          bucket?: string
+          caption?: string | null
+          created_at?: string
+          height?: number | null
+          id?: string
+          mime_type?: string | null
+          path?: string
+          size_bytes?: number | null
+          updated_at?: string
+          uploaded_by?: string | null
+          width?: number | null
         }
         Relationships: []
       }
@@ -59,6 +111,7 @@ export type Database = {
           description: string
           highlights: string[]
           id: string
+          is_active: boolean
           sort_order: number
           team_size: string | null
           title: string
@@ -70,6 +123,7 @@ export type Database = {
           description: string
           highlights?: string[]
           id?: string
+          is_active?: boolean
           sort_order?: number
           team_size?: string | null
           title: string
@@ -81,11 +135,138 @@ export type Database = {
           description?: string
           highlights?: string[]
           id?: string
+          is_active?: boolean
           sort_order?: number
           team_size?: string | null
           title?: string
           updated_at?: string
           year?: string
+        }
+        Relationships: []
+      }
+      navigation_items: {
+        Row: {
+          created_at: string
+          href: string
+          id: string
+          is_active: boolean
+          is_external: boolean
+          label: string
+          location: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          href: string
+          id?: string
+          is_active?: boolean
+          is_external?: boolean
+          label: string
+          location: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          href?: string
+          id?: string
+          is_active?: boolean
+          is_external?: boolean
+          label?: string
+          location?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      page_sections: {
+        Row: {
+          content: Json
+          created_at: string
+          eyebrow: string | null
+          id: string
+          is_published: boolean
+          page_slug: string
+          section_key: string
+          section_type: string
+          sort_order: number
+          title: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          eyebrow?: string | null
+          id?: string
+          is_published?: boolean
+          page_slug: string
+          section_key: string
+          section_type?: string
+          sort_order?: number
+          title?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          eyebrow?: string | null
+          id?: string
+          is_published?: boolean
+          page_slug?: string
+          section_key?: string
+          section_type?: string
+          sort_order?: number
+          title?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      seo_pages: {
+        Row: {
+          canonical_path: string | null
+          created_at: string
+          description: string
+          is_published: boolean
+          no_index: boolean
+          og_description: string | null
+          og_image_path: string | null
+          og_title: string | null
+          slug: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          canonical_path?: string | null
+          created_at?: string
+          description?: string
+          is_published?: boolean
+          no_index?: boolean
+          og_description?: string | null
+          og_image_path?: string | null
+          og_title?: string | null
+          slug: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          canonical_path?: string | null
+          created_at?: string
+          description?: string
+          is_published?: boolean
+          no_index?: boolean
+          og_description?: string | null
+          og_image_path?: string | null
+          og_title?: string | null
+          slug?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }
@@ -97,6 +278,7 @@ export type Database = {
           detail: string
           icon_name: string
           id: string
+          is_active: boolean
           short: string
           sort_order: number
           title: string
@@ -109,6 +291,7 @@ export type Database = {
           detail: string
           icon_name?: string
           id?: string
+          is_active?: boolean
           short: string
           sort_order?: number
           title: string
@@ -121,6 +304,7 @@ export type Database = {
           detail?: string
           icon_name?: string
           id?: string
+          is_active?: boolean
           short?: string
           sort_order?: number
           title?: string
@@ -128,18 +312,54 @@ export type Database = {
         }
         Relationships: []
       }
+      site_content: {
+        Row: {
+          content: Json
+          created_at: string
+          description: string | null
+          is_published: boolean
+          key: string
+          label: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          description?: string | null
+          is_published?: boolean
+          key: string
+          label: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          description?: string | null
+          is_published?: boolean
+          key?: string
+          label?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
+          created_at: string
           id: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
+          created_at?: string
           id?: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
+          created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string

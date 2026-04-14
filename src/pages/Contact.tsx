@@ -4,6 +4,9 @@ import { Mail, MapPin, Linkedin, Send, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { z } from "zod";
 import kgcLogo from "@/assets/kgc-logo.png";
+import { defaultCompanyContact, defaultContactPage } from "@/lib/cms";
+import { useSiteContent } from "@/hooks/useSiteContent";
+import { usePageSeo } from "@/hooks/usePageSeo";
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
@@ -15,9 +18,12 @@ const contactSchema = z.object({
 
 type ContactForm = z.infer<typeof contactSchema>;
 
-const contactEmail = "info@kgc.co.me";
+const contactSeo = {
+  title: "Contact KGC",
+  description: "Start a conversation with KGC about your project, operations, or growth challenge.",
+};
 
-const buildMailtoLink = (form: ContactForm) => {
+const buildMailtoLink = (form: ContactForm, contactEmail: string) => {
   const body = [
     `Name: ${form.name}`,
     `Email: ${form.email}`,
@@ -37,6 +43,9 @@ const Contact = () => {
   });
   const [errors, setErrors] = useState<Partial<Record<keyof ContactForm, string>>>({});
   const [submitted, setSubmitted] = useState(false);
+  const content = useSiteContent("contact.page", defaultContactPage);
+  const contact = useSiteContent("company.contact", defaultCompanyContact);
+  usePageSeo("contact", contactSeo);
 
   const handleChange = (field: keyof ContactForm, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -54,7 +63,7 @@ const Contact = () => {
       setErrors(fieldErrors);
       return;
     }
-    window.location.href = buildMailtoLink(result.data);
+    window.location.href = buildMailtoLink(result.data, contact.email);
     setSubmitted(true);
   };
 
@@ -78,18 +87,18 @@ const Contact = () => {
         <div className="max-w-5xl">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mb-10 sm:mb-16">
             <div className="accent-bar mb-6" />
-            <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold tracking-tight mb-4">Let's Start a Conversation</h1>
+            <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold tracking-tight mb-4">{content.headline}</h1>
             <p className="text-muted-foreground text-base sm:text-lg max-w-xl">
-              Reach out to discuss how KGC can help transform your business operations.
+              {content.intro}
             </p>
           </motion.div>
 
           <div className="grid lg:grid-cols-3 gap-8 sm:gap-12">
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="order-2 lg:order-1 space-y-4 sm:space-y-6">
               {[
-                { icon: Mail, title: "Email", content: <a href={`mailto:${contactEmail}`} className="text-sm text-muted-foreground hover:text-primary transition-colors">{contactEmail}</a> },
-                { icon: MapPin, title: "Office", content: <p className="text-sm text-muted-foreground">Arsenal Business Club<br />Seljanovo B.B., Tivat<br />Montenegro</p> },
-                { icon: Linkedin, title: "LinkedIn", content: <a href="https://www.linkedin.com/in/velibor-kastratovic/" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors">Connect with us</a> },
+                { icon: Mail, title: "Email", content: <a href={`mailto:${contact.email}`} className="text-sm text-muted-foreground hover:text-primary transition-colors">{contact.email}</a> },
+                { icon: MapPin, title: "Office", content: <p className="text-sm text-muted-foreground">{contact.officeName}<br />{contact.street}, {contact.city}<br />{contact.country}</p> },
+                { icon: Linkedin, title: "LinkedIn", content: <a href={contact.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors">Connect with us</a> },
               ].map(item => (
                 <div key={item.title} className="border border-border p-5 sm:p-6">
                   <item.icon className="w-5 h-5 text-primary mb-3" />
@@ -105,9 +114,9 @@ const Contact = () => {
                   <div className="w-14 h-14 bg-primary/10 flex items-center justify-center mx-auto mb-6">
                     <Send className="w-6 h-6 text-primary" />
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-bold mb-3">Email Draft Opened</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold mb-3">{content.successTitle}</h3>
                   <p className="text-muted-foreground mb-6">
-                    Your message is ready in your email app. Please review and send it from there.
+                    {content.successBody}
                   </p>
                   <button onClick={() => { setSubmitted(false); setForm({ name: "", email: "", company: "", subject: "", message: "" }); }} className="text-sm text-primary hover:underline">
                     Prepare another message
@@ -116,7 +125,7 @@ const Contact = () => {
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
                   <p className="text-sm text-muted-foreground">
-                    This form opens a prepared email draft so you can review it before sending.
+                    {content.formHelper}
                   </p>
                   <div className="grid sm:grid-cols-2 gap-4 sm:gap-5">
                     <div>
