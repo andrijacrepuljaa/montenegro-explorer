@@ -1,16 +1,8 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { Target, Lightbulb, TrendingUp, Users } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import { defaultHomeAbout } from "@/lib/cms";
 import { useSiteContent } from "@/hooks/useSiteContent";
-
-const iconMap: Record<string, LucideIcon> = {
-  Target,
-  Lightbulb,
-  TrendingUp,
-  Users,
-};
+import { getIconByName } from "@/lib/iconLibrary";
 
 const AboutSection = () => {
   const ref = useRef(null);
@@ -40,16 +32,16 @@ const AboutSection = () => {
             ))}
           </motion.div>
 
-          <div className="grid grid-cols-2 gap-4 sm:gap-6">
+          <div className="grid auto-rows-fr grid-cols-2 gap-4 sm:gap-6">
             {about.pillars.map((p, i) => {
-              const Icon = iconMap[p.iconName] || Target;
+              const Icon = getIconByName(p.iconName);
               return (
               <motion.div
                 key={p.title}
                 initial={{ opacity: 0, y: 20 }}
                 animate={inView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.4, delay: 0.15 + i * 0.08 }}
-                className="border border-border p-4 sm:p-6 hover:border-primary/40 transition-colors group"
+                className="flex h-full min-h-[11.5rem] flex-col border border-border p-4 transition-colors group hover:border-primary/40 sm:min-h-[13rem] sm:p-6"
               >
                 <Icon className="w-6 sm:w-8 h-6 sm:h-8 text-primary mb-3 sm:mb-4 group-hover:scale-110 transition-transform" />
                 <h3 className="font-semibold text-base sm:text-lg mb-1 sm:mb-2">{p.title}</h3>

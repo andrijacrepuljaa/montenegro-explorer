@@ -4,12 +4,15 @@ import {
   ArrowLeft,
   Briefcase,
   Contact,
+  FileText,
+  GraduationCap,
   Home,
   Image,
   LayoutDashboard,
   LogOut,
   Milestone,
   Navigation,
+  Palette,
   Search,
   Settings,
   Sparkles,
@@ -23,20 +26,24 @@ import { inputClass, mutedLabelClass } from "@/lib/adminUi";
 import { LoadingPanel } from "@/components/AdminShared";
 import { AdminDashboard } from "@/components/AdminDashboard";
 import { HomepageEditor, ContactEditor } from "@/components/AdminContentEditors";
-import { CareersEditor } from "@/components/AdminCareersEditor";
+import { CareersPageEditor, CareerOpeningsEditor, InternshipOpeningsEditor, InternshipsPageEditor } from "@/components/AdminCareersEditor";
 import { MilestonesEditor, ServicesEditor } from "@/components/AdminDataEditors";
-import { MediaEditor, NavigationEditor, SeoEditor, SettingsEditor } from "@/components/AdminUtilityEditors";
+import { MediaEditor, NavigationEditor, SeoEditor, SettingsEditor, ThemeEditor } from "@/components/AdminUtilityEditors";
 
 type AdminSection =
   | "dashboard"
   | "homepage"
   | "services"
   | "milestones"
-  | "careers"
+  | "careers-page"
+  | "career-openings"
+  | "internships-page"
+  | "internship-openings"
   | "contact"
   | "navigation"
   | "seo"
   | "media"
+  | "theme"
   | "settings";
 
 const adminSections: Array<{ id: AdminSection; label: string; description: string; icon: LucideIcon }> = [
@@ -44,26 +51,34 @@ const adminSections: Array<{ id: AdminSection; label: string; description: strin
   { id: "homepage", label: "Homepage", description: "Hero, about, expertise, and CTA copy", icon: Home },
   { id: "services", label: "Services", description: "Consulting services and benefits", icon: Sparkles },
   { id: "milestones", label: "Milestones", description: "Company timeline and highlights", icon: Milestone },
-  { id: "careers", label: "Careers", description: "Open roles, internships, and page copy", icon: Briefcase },
+  { id: "careers-page", label: "Careers Page", description: "Standalone careers page layout and supporting copy", icon: FileText },
+  { id: "career-openings", label: "Career Openings", description: "Full-time role listings and application links", icon: Briefcase },
+  { id: "internships-page", label: "Internships Page", description: "Dedicated internship programme page content", icon: GraduationCap },
+  { id: "internship-openings", label: "Internship Openings", description: "Internship role listings and application links", icon: GraduationCap },
   { id: "contact", label: "Contact Info", description: "Email, office, LinkedIn, and contact page", icon: Contact },
   { id: "navigation", label: "Navigation", description: "Header and footer links", icon: Navigation },
   { id: "seo", label: "SEO", description: "Meta titles and social sharing", icon: Search },
   { id: "media", label: "Media", description: "Upload and manage website assets", icon: Image },
+  { id: "theme", label: "Theme", description: "Edit the site color groups and preview them live", icon: Palette },
   { id: "settings", label: "Settings", description: "Admin account and project notes", icon: Settings },
 ];
 
 const isAdminSection = (value: string): value is AdminSection =>
   adminSections.some((section) => section.id === value);
 
-const getInitialSection = (): AdminSection => {
+const getHashState = (): { section: AdminSection; panel?: string } => {
   const hash = window.location.hash.replace("#", "");
-  return isAdminSection(hash) ? hash : "dashboard";
+  const [sectionCandidate, panelCandidate] = hash.split(":");
+  return {
+    section: isAdminSection(sectionCandidate) ? sectionCandidate : "dashboard",
+    panel: panelCandidate || undefined,
+  };
 };
 
 const Admin = () => {
   const { user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState<AdminSection>(getInitialSection);
+  const [{ section: activeSection, panel: activePanel }, setHashState] = useState(getHashState);
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) navigate("/admin/login");
@@ -71,8 +86,7 @@ const Admin = () => {
 
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash.replace("#", "");
-      if (isAdminSection(hash)) setActiveSection(hash);
+      setHashState(getHashState());
     };
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
@@ -83,9 +97,10 @@ const Admin = () => {
     [activeSection],
   );
 
-  const goToSection = (section: AdminSection) => {
-    setActiveSection(section);
-    window.history.replaceState(null, "", `#${section}`);
+  const goToSection = (section: AdminSection, panel?: string) => {
+    setHashState({ section, panel });
+    const nextHash = panel ? `#${section}:${panel}` : `#${section}`;
+    window.history.replaceState(null, "", nextHash);
   };
 
   const handleLogout = async () => {
@@ -155,15 +170,70 @@ const Admin = () => {
         </header>
 
         <main className="px-4 pb-10 sm:px-6">
-          {activeSection === "dashboard" && <AdminDashboard />}
-          {activeSection === "homepage" && <HomepageEditor />}
-          {activeSection === "services" && <ServicesEditor />}
-          {activeSection === "milestones" && <MilestonesEditor />}
-          {activeSection === "careers" && <CareersEditor />}
-          {activeSection === "contact" && <ContactEditor />}
-          {activeSection === "navigation" && <NavigationEditor />}
-          {activeSection === "seo" && <SeoEditor />}
-          {activeSection === "media" && <MediaEditor />}
+          {activeSection === "dashboard" && (
+            <AdminDashboard
+              activeSection={activeSection}
+              activePanel={activePanel}
+              onSelect={(section, panel) => goToSection(section as AdminSection, panel)}
+            />
+          )}
+          {activeSection === "homepage" && (
+            <HomepageEditor
+              activePanel={activePanel}
+              onSelectPanel={(panel, section) => goToSection((section as AdminSection | undefined) ?? "homepage", panel)}
+            />
+          )}
+          {activeSection === "services" && (
+            <ServicesEditor
+              activePanel={activePanel}
+              onSelectPanel={(panel) => goToSection("services", panel)}
+            />
+          )}
+          {activeSection === "milestones" && (
+            <MilestonesEditor
+              activePanel={activePanel}
+              onSelectPanel={(panel) => goToSection("milestones", panel)}
+            />
+          )}
+          {activeSection === "careers-page" && (
+            <CareersPageEditor
+              activePanel={activePanel}
+              onSelectPanel={(panel) => goToSection("careers-page", panel)}
+            />
+          )}
+          {activeSection === "career-openings" && (
+            <CareerOpeningsEditor
+              activePanel={activePanel}
+              onSelectPanel={(panel) => goToSection("career-openings", panel)}
+            />
+          )}
+          {activeSection === "internships-page" && (
+            <InternshipsPageEditor
+              activePanel={activePanel}
+              onSelectPanel={(panel) => goToSection("internships-page", panel)}
+            />
+          )}
+          {activeSection === "internship-openings" && (
+            <InternshipOpeningsEditor
+              activePanel={activePanel}
+              onSelectPanel={(panel) => goToSection("internship-openings", panel)}
+            />
+          )}
+          {activeSection === "contact" && (
+            <ContactEditor
+              activePanel={activePanel}
+              onSelectPanel={(panel) => goToSection("contact", panel)}
+            />
+          )}
+          {activeSection === "navigation" && <NavigationEditor activePanel={activePanel} />}
+          {activeSection === "seo" && <SeoEditor activePanel={activePanel} />}
+          {activeSection === "media" && <MediaEditor activePanel={activePanel} />}
+          {activeSection === "theme" && (
+            <ThemeEditor
+              activePanel={activePanel}
+              onSelectPanel={(panel) => goToSection("theme", panel)}
+            />
+          )}
           {activeSection === "settings" && <SettingsEditor userEmail={user?.email} />}
         </main>
       </div>

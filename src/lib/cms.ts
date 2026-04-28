@@ -47,7 +47,7 @@ export type SectionIntroContent = {
   buttonHref?: string;
 };
 
-export type CareersPageContent = {
+type LegacyCareersPageContent = {
   headline: string;
   intro: string;
   careersHeading: string;
@@ -62,6 +62,44 @@ export type CareersPageContent = {
   preferredFieldsHeading: string;
   preferredFields: string[];
   careerPerks: IconContentItem[];
+  internPerks: IconContentItem[];
+};
+
+export type CareersPageContent = {
+  headline: string;
+  intro: string;
+  careersHeading: string;
+  positionsHeading: string;
+  noOpeningsTitle: string;
+  noOpeningsBody: string;
+  talentPoolTitle: string;
+  talentPoolBody: string;
+  talentPoolButtonLabel: string;
+  talentPoolButtonHref: string;
+  internshipsLinkTitle: string;
+  internshipsLinkBody: string;
+  internshipsLinkLabel: string;
+  internshipsLinkHref: string;
+  careerPerks: IconContentItem[];
+};
+
+export type InternshipsPageContent = {
+  headline: string;
+  intro: string;
+  programHeading: string;
+  programIntro: string[];
+  perksHeading: string;
+  positionsHeading: string;
+  noOpeningsTitle: string;
+  noOpeningsBody: string;
+  preferredFieldsHeading: string;
+  preferredFields: string[];
+  applyButtonLabel: string;
+  applyButtonHref: string;
+  careersLinkTitle: string;
+  careersLinkBody: string;
+  careersLinkLabel: string;
+  careersLinkHref: string;
   internPerks: IconContentItem[];
 };
 
@@ -176,7 +214,7 @@ export const defaultHomeContactCta: SectionIntroContent = {
   buttonHref: "/contact",
 };
 
-export const defaultCareersPage: CareersPageContent = {
+const defaultLegacyCareersPage: LegacyCareersPageContent = {
   headline: "Join Our Team",
   intro: "Build your career in management consulting with a team that values impact, growth, and collaboration.",
   careersHeading: "Why KGC?",
@@ -247,6 +285,45 @@ export const defaultCareersPage: CareersPageContent = {
   ],
 };
 
+export const defaultCareersPage: CareersPageContent = {
+  headline: defaultLegacyCareersPage.headline,
+  intro: defaultLegacyCareersPage.intro,
+  careersHeading: defaultLegacyCareersPage.careersHeading,
+  positionsHeading: defaultLegacyCareersPage.positionsHeading,
+  noOpeningsTitle: defaultLegacyCareersPage.noOpeningsTitle,
+  noOpeningsBody: defaultLegacyCareersPage.noOpeningsBody,
+  talentPoolTitle: defaultLegacyCareersPage.talentPoolTitle,
+  talentPoolBody: defaultLegacyCareersPage.talentPoolBody,
+  talentPoolButtonLabel: defaultLegacyCareersPage.talentPoolButtonLabel,
+  talentPoolButtonHref: "/contact",
+  internshipsLinkTitle: "Looking for internships instead?",
+  internshipsLinkBody: "Explore the KGC internship programme, open positions, and the mentoring structure we offer graduates and early-career talent.",
+  internshipsLinkLabel: "Explore Internship Programme",
+  internshipsLinkHref: "/internships",
+  careerPerks: defaultLegacyCareersPage.careerPerks,
+};
+
+export const defaultInternshipsPage: InternshipsPageContent = {
+  headline: "KGC Internship Programme",
+  intro: "Gain real consulting experience, dedicated mentorship, and a clear view of how modern management consulting work gets delivered.",
+  programHeading: defaultLegacyCareersPage.internshipHeading,
+  programIntro: defaultLegacyCareersPage.internshipIntro,
+  perksHeading: "Why Intern at KGC?",
+  positionsHeading: "Open Internships",
+  noOpeningsTitle: "No internship positions are open right now",
+  noOpeningsBody:
+    "We still welcome strong student and graduate profiles in supply chain, project management, digital marketing, data analytics, and business strategy.",
+  preferredFieldsHeading: defaultLegacyCareersPage.preferredFieldsHeading,
+  preferredFields: defaultLegacyCareersPage.preferredFields,
+  applyButtonLabel: "Apply for Internship",
+  applyButtonHref: "/contact",
+  careersLinkTitle: "Looking for a full-time role?",
+  careersLinkBody: "Browse current consulting openings and our talent pool call for experienced professionals.",
+  careersLinkLabel: "Explore Career Roles",
+  careersLinkHref: "/careers",
+  internPerks: defaultLegacyCareersPage.internPerks,
+};
+
 export const defaultContactPage: ContactPageContent = {
   headline: "Let's Start a Conversation",
   intro: "Reach out to discuss how KGC can help transform your business operations.",
@@ -289,6 +366,33 @@ export async function fetchSiteContent<T extends object>(key: string, fallback: 
   return mergeContent(fallback, data.content);
 }
 
+export async function fetchSiteContentWithLegacy<T extends object>(
+  key: string,
+  fallback: T,
+  legacy?: { key: string; map: (content: unknown) => Partial<T> },
+): Promise<T> {
+  const { data, error } = await supabase
+    .from("site_content")
+    .select("content")
+    .eq("key", key)
+    .eq("is_published", true)
+    .maybeSingle();
+
+  if (data?.content) return mergeContent(fallback, data.content);
+  if (error && !legacy) return fallback;
+  if (!legacy) return fallback;
+
+  const legacyResult = await supabase
+    .from("site_content")
+    .select("content")
+    .eq("key", legacy.key)
+    .eq("is_published", true)
+    .maybeSingle();
+
+  if (!legacyResult.data?.content) return fallback;
+  return { ...fallback, ...legacy.map(legacyResult.data.content) };
+}
+
 export async function upsertSiteContent<T extends object>(
   key: string,
   label: string,
@@ -309,4 +413,53 @@ export async function upsertSiteContent<T extends object>(
 
 export function getPublicMediaUrl(path: string, bucket = "site-media") {
   return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+}
+
+export function extractInternshipsPageContent(content: unknown): Partial<InternshipsPageContent> {
+  if (!isRecord(content)) return {};
+
+  const hasNewInternshipShape =
+    typeof content.programHeading === "string" ||
+    typeof content.applyButtonLabel === "string" ||
+    typeof content.careersLinkLabel === "string";
+
+  if (hasNewInternshipShape) {
+    return mergeContent(defaultInternshipsPage, content);
+  }
+
+  return {
+    headline: typeof content.internshipHeading === "string" ? content.internshipHeading : defaultInternshipsPage.headline,
+    intro:
+      Array.isArray(content.internshipIntro) && typeof content.internshipIntro[0] === "string"
+        ? content.internshipIntro[0]
+        : defaultInternshipsPage.intro,
+    programHeading:
+      typeof content.internshipHeading === "string" ? content.internshipHeading : defaultInternshipsPage.programHeading,
+    programIntro:
+      Array.isArray(content.internshipIntro)
+        ? content.internshipIntro.filter((item): item is string => typeof item === "string")
+        : defaultInternshipsPage.programIntro,
+    preferredFieldsHeading:
+      typeof content.preferredFieldsHeading === "string"
+        ? content.preferredFieldsHeading
+        : defaultInternshipsPage.preferredFieldsHeading,
+    preferredFields:
+      Array.isArray(content.preferredFields)
+        ? content.preferredFields.filter((item): item is string => typeof item === "string")
+        : defaultInternshipsPage.preferredFields,
+    internPerks:
+      Array.isArray(content.internPerks)
+        ? (content.internPerks as IconContentItem[])
+        : defaultInternshipsPage.internPerks,
+  };
+}
+
+export function hasLegacyInternshipContent(content: unknown) {
+  if (!isRecord(content)) return false;
+  return (
+    typeof content.internshipHeading === "string" ||
+    Array.isArray(content.internshipIntro) ||
+    Array.isArray(content.preferredFields) ||
+    Array.isArray(content.internPerks)
+  );
 }

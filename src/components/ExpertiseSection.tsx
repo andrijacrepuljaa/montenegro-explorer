@@ -1,15 +1,11 @@
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Network, Warehouse, PackageSearch, DollarSign, ClipboardCheck, ShieldAlert, Megaphone, Palette, BarChart3, Target, Lightbulb, TrendingUp, ArrowRight, X, ChevronRight } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { Network, Warehouse, PackageSearch, DollarSign, ClipboardCheck, ShieldAlert, Megaphone, Palette, ArrowRight, X, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { defaultExpertiseIntro } from "@/lib/cms";
 import { useSiteContent } from "@/hooks/useSiteContent";
-
-const iconMap: Record<string, LucideIcon> = {
-  Network, Warehouse, PackageSearch, DollarSign, ClipboardCheck, ShieldAlert, Megaphone, Palette, BarChart3, Target, Lightbulb, TrendingUp,
-};
+import { getIconByName } from "@/lib/iconLibrary";
 
 const fallbackServices = [
   { icon: Network, title: "Supply Chain Network Design", short: "How many production or distribution facilities is the right fit for my business purpose?", detail: "We combine sound business knowledge with our linear modelling based approach to (re)define parts or the whole end-to-end supply chain network.", benefits: ["End-to-end network optimization", "Linear modelling-based approach", "Facility location analysis", "Cost-to-serve optimization", "Scenario planning & simulation"], category: "Supply Chain" },
@@ -43,6 +39,11 @@ const isPublishableService = (service: {
   return hasRequiredContent && allowedCategories.has(service.category ?? "") && !/^test\b/i.test(title);
 };
 
+const getFillerCount = (itemCount: number, columns: number) => {
+  if (columns <= 1 || itemCount === 0) return 0;
+  return (columns - (itemCount % columns)) % columns;
+};
+
 const ExpertiseSection = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
@@ -50,6 +51,8 @@ const ExpertiseSection = () => {
   const [expandedService, setExpandedService] = useState<number | null>(null);
   const [services, setServices] = useState(fallbackServices);
   const intro = useSiteContent("home.expertise", defaultExpertiseIntro);
+  const tabletFillerCount = getFillerCount(services.length, 2);
+  const desktopFillerCount = getFillerCount(services.length, 4);
 
   useEffect(() => {
     supabase
@@ -64,7 +67,7 @@ const ExpertiseSection = () => {
 
           setServices(
             publishableServices.map((s) => ({
-              icon: iconMap[s.icon_name] || Network,
+              icon: getIconByName(s.icon_name, Network),
               title: s.title,
               short: s.short,
               detail: s.detail,
@@ -88,7 +91,7 @@ const ExpertiseSection = () => {
           >
             <div className="accent-bar mb-6" />
             <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold tracking-tight mb-4">{intro.headline}</h2>
-            <p className="text-white/60 text-base sm:text-lg">
+            <p className="text-hero-fg/60 text-base sm:text-lg">
               {intro.intro}
             </p>
           </motion.div>
@@ -107,13 +110,27 @@ const ExpertiseSection = () => {
                 aria-haspopup="dialog"
               >
                 <p className="text-xs font-medium text-primary uppercase tracking-wider mb-3 sm:mb-4">{s.category}</p>
-                <s.icon className="w-6 sm:w-7 h-6 sm:h-7 text-white/40 group-hover:text-primary transition-colors mb-4 sm:mb-5" />
-                <h3 className="font-semibold text-base sm:text-lg mb-2 sm:mb-3 text-white">{s.title}</h3>
-                <p className="text-sm text-white/65 leading-relaxed mb-3 sm:mb-4">{s.short}</p>
+                <s.icon className="w-6 sm:w-7 h-6 sm:h-7 text-hero-fg/40 group-hover:text-primary transition-colors mb-4 sm:mb-5" />
+                <h3 className="font-semibold text-base sm:text-lg mb-2 sm:mb-3 text-hero-fg">{s.title}</h3>
+                <p className="text-sm text-hero-fg/65 leading-relaxed mb-3 sm:mb-4">{s.short}</p>
                 <span className="inline-flex items-center gap-1 text-xs text-primary font-medium">
                   View details <ChevronRight className="w-3 h-3" />
                 </span>
               </motion.button>
+            ))}
+            {Array.from({ length: tabletFillerCount }).map((_, index) => (
+              <div
+                key={`tablet-filler-${index}`}
+                aria-hidden="true"
+                className="hidden bg-hero-bg sm:block lg:hidden"
+              />
+            ))}
+            {Array.from({ length: desktopFillerCount }).map((_, index) => (
+              <div
+                key={`desktop-filler-${index}`}
+                aria-hidden="true"
+                className="hidden bg-hero-bg lg:block"
+              />
             ))}
           </div>
         </div>

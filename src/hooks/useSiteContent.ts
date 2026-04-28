@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchSiteContent, type NavigationItem } from "@/lib/cms";
+import { fetchSiteContent, fetchSiteContentWithLegacy, type NavigationItem } from "@/lib/cms";
 import { supabase } from "@/integrations/supabase/client";
 
 export function useSiteContent<T extends object>(key: string, fallback: T) {
@@ -16,6 +16,29 @@ export function useSiteContent<T extends object>(key: string, fallback: T) {
       mounted = false;
     };
   }, [key, fallback]);
+
+  return content;
+}
+
+export function useSiteContentWithLegacy<T extends object>(
+  key: string,
+  fallback: T,
+  legacyKey: string,
+  mapLegacy: (content: unknown) => Partial<T>,
+) {
+  const [content, setContent] = useState(fallback);
+
+  useEffect(() => {
+    let mounted = true;
+
+    fetchSiteContentWithLegacy(key, fallback, { key: legacyKey, map: mapLegacy }).then((nextContent) => {
+      if (mounted) setContent(nextContent);
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, [fallback, key, legacyKey, mapLegacy]);
 
   return content;
 }

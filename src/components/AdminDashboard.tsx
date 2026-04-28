@@ -3,8 +3,17 @@ import { Briefcase, FileText, Image, Milestone, Search, Sparkles } from "lucide-
 import { supabase } from "@/integrations/supabase/client";
 import { mutedLabelClass, panelClass } from "@/lib/adminUi";
 import { LoadingPanel, SaveBar } from "@/components/AdminShared";
+import { AdminPageMap } from "@/components/AdminPageMap";
 
-export function AdminDashboard() {
+export function AdminDashboard({
+  activeSection,
+  activePanel,
+  onSelect,
+}: {
+  activeSection?: string;
+  activePanel?: string;
+  onSelect: (section: string, panel?: string) => void;
+}) {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     services: 0,
@@ -83,6 +92,9 @@ export function AdminDashboard() {
             Most copy and data edits are visible after refresh. Code or layout changes still need a Git push and Vercel deployment.
           </p>
         </div>
+      </div>
+      <div className="mt-6">
+        <AdminPageMap activeSection={activeSection} activePanel={activePanel} onSelect={onSelect} />
       </div>
     </div>
   );

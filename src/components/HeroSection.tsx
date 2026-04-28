@@ -22,14 +22,14 @@ const HeroSection = () => {
           <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight mb-4 sm:mb-6">
             {hero.headline}
           </h1>
-          <p className="text-base sm:text-lg md:text-xl text-white/70 max-w-2xl mb-8 sm:mb-10 leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl text-hero-fg/70 max-w-2xl mb-8 sm:mb-10 leading-relaxed">
             {hero.intro}
           </p>
           <div className="flex gap-3 sm:gap-4 flex-wrap">
             <a href={hero.primaryCtaHref} className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity">
               {hero.primaryCtaLabel} <ArrowRight className="w-4 h-4" />
             </a>
-            <Link to={hero.secondaryCtaHref} className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 border border-white/30 text-white font-semibold text-sm hover:bg-white/10 transition-colors">
+            <Link to={hero.secondaryCtaHref} className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 border border-hero-fg/30 text-hero-fg font-semibold text-sm hover:bg-hero-fg/10 transition-colors">
               {hero.secondaryCtaLabel}
             </Link>
           </div>
@@ -39,7 +39,7 @@ const HeroSection = () => {
           {hero.stats.map(s => (
             <div key={s.label}>
               <p className="text-2xl sm:text-3xl md:text-5xl font-bold text-primary mb-1">{s.value}</p>
-              <p className="text-xs sm:text-sm text-white/50 uppercase tracking-wider">{s.label}</p>
+              <p className="text-xs sm:text-sm text-hero-fg/50 uppercase tracking-wider">{s.label}</p>
             </div>
           ))}
         </motion.div>

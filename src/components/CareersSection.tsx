@@ -20,7 +20,7 @@ const CareersSection = () => {
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
             Join Our Team
           </h2>
-          <p className="text-white/60 text-lg mb-10 leading-relaxed">
+          <p className="text-hero-fg/60 text-lg mb-10 leading-relaxed">
             Build your career in management consulting. We offer full-time positions and internship opportunities for ambitious professionals ready to make an impact.
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
@@ -33,7 +33,7 @@ const CareersSection = () => {
             </Link>
             <Link
               to="/contact"
-              className="inline-flex items-center gap-2 px-8 py-3.5 border border-white/30 text-white font-semibold text-sm hover:bg-white/10 transition-colors"
+              className="inline-flex items-center gap-2 px-8 py-3.5 border border-hero-fg/30 text-hero-fg font-semibold text-sm hover:bg-hero-fg/10 transition-colors"
             >
               Contact Us
             </Link>

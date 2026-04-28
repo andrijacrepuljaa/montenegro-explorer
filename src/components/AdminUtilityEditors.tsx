@@ -1,18 +1,45 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { ExternalLink, FileText, Link2, Loader2, Trash2, Upload } from "lucide-react";
+import { ExternalLink, FileText, Link2, Loader2, Palette, Search, Trash2, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { getPublicMediaUrl, type MediaAsset } from "@/lib/cms";
-import { newNavigationItem, newSeoPage, type NavigationDraft, type SeoDraft } from "@/lib/adminCms";
-import { areaClass, inputClass, mutedLabelClass, panelClass, useBeforeUnload } from "@/lib/adminUi";
+import { fetchCmsContent, newNavigationItem, newSeoPage, type NavigationDraft, type SeoDraft } from "@/lib/adminCms";
+import { getPublicMediaUrl, upsertSiteContent, type MediaAsset } from "@/lib/cms";
+import { applyThemePalette, defaultThemePalette, type ThemePalette } from "@/lib/themePalette";
+import { areaClass, inputClass, mutedLabelClass, panelClass, useBeforeUnload, useScrollToPanel } from "@/lib/adminUi";
 import { EmptyState, Field, LoadingPanel, SaveBar, ToggleField } from "@/components/AdminShared";
+import { SectionJumpBar } from "@/components/AdminPageMap";
 
-export function NavigationEditor() {
+function ThemeColorField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className="rounded-md border border-border p-3">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <span className="text-sm font-medium">{label}</span>
+        <input type="color" value={value} onChange={(event) => onChange(event.target.value)} className="h-10 w-14 rounded border border-border bg-background p-1" />
+      </div>
+      <input className={inputClass} value={value} onChange={(event) => onChange(event.target.value)} />
+    </div>
+  );
+}
+
+export function NavigationEditor({
+  activePanel,
+}: {
+  activePanel?: string;
+}) {
   const [items, setItems] = useState<NavigationDraft[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   useBeforeUnload(dirty);
+  useScrollToPanel(activePanel);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -73,7 +100,7 @@ export function NavigationEditor() {
   return (
     <div>
       <SaveBar title="Navigation" description="Manage header and footer links." saving={saving} onSave={save} onAdd={() => { setItems([...items, newNavigationItem("header", items.length)]); setDirty(true); }} addLabel="Add link" />
-      <div className="space-y-4">
+      <div className="space-y-4" data-admin-panel="nav-links">
         {items.map((item, index) => (
           <div key={item.id || `nav-${index}`} className={panelClass}>
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -108,12 +135,17 @@ export function NavigationEditor() {
   );
 }
 
-export function SeoEditor() {
+export function SeoEditor({
+  activePanel,
+}: {
+  activePanel?: string;
+}) {
   const [items, setItems] = useState<SeoDraft[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   useBeforeUnload(dirty);
+  useScrollToPanel(activePanel);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -169,7 +201,7 @@ export function SeoEditor() {
   return (
     <div>
       <SaveBar title="SEO" description="Manage search snippets and social sharing content for key pages." saving={saving} onSave={save} onAdd={() => { setItems([...items, newSeoPage()]); setDirty(true); }} addLabel="Add page" />
-      <div className="space-y-4">
+      <div className="space-y-4" data-admin-panel="seo-pages">
         {items.map((item, index) => (
           <div key={item.slug || `seo-${index}`} className={panelClass}>
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -198,12 +230,17 @@ export function SeoEditor() {
   );
 }
 
-export function MediaEditor() {
+export function MediaEditor({
+  activePanel,
+}: {
+  activePanel?: string;
+}) {
   const [items, setItems] = useState<MediaAsset[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [altText, setAltText] = useState("");
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
+  useScrollToPanel(activePanel);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -265,7 +302,7 @@ export function MediaEditor() {
   return (
     <div>
       <SaveBar title="Media" description="Upload assets for pages, SEO images, and future content blocks." />
-      <section className={panelClass}>
+      <section className={panelClass} data-admin-panel="media-library">
         <p className={mutedLabelClass}>Upload</p>
         <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_1fr_auto] lg:items-end">
           <Field label="File"><input type="file" className={inputClass} onChange={(event) => setFile(event.target.files?.[0] || null)} /></Field>
@@ -315,6 +352,184 @@ export function MediaEditor() {
           </div>
         )}
       </section>
+    </div>
+  );
+}
+
+export function ThemeEditor({
+  activePanel,
+  onSelectPanel,
+}: {
+  activePanel?: string;
+  onSelectPanel: (panel: string) => void;
+}) {
+  const [palette, setPalette] = useState<ThemePalette>(defaultThemePalette);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  useBeforeUnload(dirty);
+  useScrollToPanel(activePanel);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const nextPalette = await fetchCmsContent("theme.palette", defaultThemePalette);
+      setPalette(nextPalette);
+      applyThemePalette(nextPalette);
+      setDirty(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Theme palette could not load.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  useEffect(() => {
+    applyThemePalette(palette);
+  }, [palette]);
+
+  const updateColor = (key: keyof ThemePalette, value: string) => {
+    setPalette((current) => ({ ...current, [key]: value }));
+    setDirty(true);
+  };
+
+  const groupedColors = useMemo(
+    () => ({
+      brand: [
+        ["primary", "Primary"],
+        ["primaryForeground", "Primary Text"],
+        ["accent", "Accent"],
+        ["accentForeground", "Accent Text"],
+      ] as Array<[keyof ThemePalette, string]>,
+      surfaces: [
+        ["background", "Background"],
+        ["foreground", "Body Text"],
+        ["card", "Card"],
+        ["cardForeground", "Card Text"],
+        ["secondary", "Secondary Surface"],
+        ["secondaryForeground", "Secondary Text"],
+        ["muted", "Muted Surface"],
+        ["mutedForeground", "Muted Text"],
+        ["border", "Border"],
+      ] as Array<[keyof ThemePalette, string]>,
+      dark: [
+        ["heroBg", "Hero Background"],
+        ["heroFg", "Hero Text"],
+        ["darkSurface", "Dark Surface"],
+        ["darkBorder", "Dark Border"],
+      ] as Array<[keyof ThemePalette, string]>,
+    }),
+    [],
+  );
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      await upsertSiteContent("theme.palette", "Theme palette", "Website color groups used across the public site and admin preview.", palette);
+      setDirty(false);
+      toast.success("Theme palette saved.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Theme palette could not save.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return <LoadingPanel />;
+
+  return (
+    <div>
+      <SaveBar title="Theme" description="Adjust the main website color groups with a live preview. Changes affect the public site and the admin preview." saving={saving} onSave={save} />
+      <div className="space-y-6">
+        <SectionJumpBar
+          title="Page Map"
+          description="Jump between the main theme groups."
+          activePanel={activePanel}
+          onSelect={onSelectPanel}
+          sections={[
+            { panel: "brand-colors", label: "Brand Colors", icon: Palette },
+            { panel: "surface-colors", label: "Surfaces", icon: Search },
+            { panel: "dark-sections", label: "Dark Sections", icon: Palette },
+          ]}
+        />
+
+        <section className={panelClass} data-admin-panel="brand-colors">
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <div>
+              <p className={mutedLabelClass}>Brand colors</p>
+              <p className="mt-1 text-sm text-muted-foreground">Primary and accent colors used by buttons, links, and key highlights.</p>
+            </div>
+            <button onClick={() => { setPalette(defaultThemePalette); setDirty(true); }} className="text-sm font-semibold text-primary">
+              Reset to defaults
+            </button>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {groupedColors.brand.map(([key, label]) => (
+              <ThemeColorField key={key} label={label} value={palette[key]} onChange={(value) => updateColor(key, value)} />
+            ))}
+          </div>
+        </section>
+
+        <section className={panelClass} data-admin-panel="surface-colors">
+          <p className={mutedLabelClass}>Surface colors</p>
+          <p className="mt-1 text-sm text-muted-foreground">Backgrounds, cards, borders, and text tones across the light sections.</p>
+          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {groupedColors.surfaces.map(([key, label]) => (
+              <ThemeColorField key={key} label={label} value={palette[key]} onChange={(value) => updateColor(key, value)} />
+            ))}
+          </div>
+        </section>
+
+        <section className={panelClass} data-admin-panel="dark-sections">
+          <p className={mutedLabelClass}>Dark sections</p>
+          <p className="mt-1 text-sm text-muted-foreground">Controls the hero, expertise area, and other dark surfaces.</p>
+          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {groupedColors.dark.map(([key, label]) => (
+              <ThemeColorField key={key} label={label} value={palette[key]} onChange={(value) => updateColor(key, value)} />
+            ))}
+          </div>
+        </section>
+
+        <section className={panelClass}>
+          <p className={mutedLabelClass}>Quick preview</p>
+          <div className="mt-4 grid gap-4 lg:grid-cols-[1.3fr_1fr]">
+            <div className="overflow-hidden rounded-md border border-border">
+              <div className="px-6 py-8" style={{ backgroundColor: palette.heroBg, color: palette.heroFg }}>
+                <p className="text-xs uppercase tracking-wider" style={{ color: palette.primary }}>Hero</p>
+                <h3 className="mt-2 text-2xl font-bold">Execution-ready consulting</h3>
+                <p className="mt-2 text-sm opacity-80">Live preview of dark sections, brand accents, and content readability.</p>
+              </div>
+              <div className="grid gap-px bg-border p-px" style={{ backgroundColor: palette.darkBorder }}>
+                <div className="grid grid-cols-2 gap-px">
+                  {[0, 1, 2, 3].map((index) => (
+                    <div key={index} className="p-4" style={{ backgroundColor: palette.card }}>
+                      <div className="mb-3 h-2 w-16 rounded-full" style={{ backgroundColor: palette.primary }} />
+                      <div className="h-4 w-3/4 rounded-sm" style={{ backgroundColor: palette.muted }} />
+                      <div className="mt-2 h-3 w-full rounded-sm" style={{ backgroundColor: palette.secondary }} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="rounded-md border border-border p-4">
+              <div className="rounded-md p-4" style={{ backgroundColor: palette.card, color: palette.cardForeground, border: `1px solid ${palette.border}` }}>
+                <p className="text-sm font-semibold">Button preview</p>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <span className="inline-flex rounded-md px-4 py-2 text-sm font-semibold" style={{ backgroundColor: palette.primary, color: palette.primaryForeground }}>Primary</span>
+                  <span className="inline-flex rounded-md px-4 py-2 text-sm font-semibold" style={{ backgroundColor: palette.accent, color: palette.accentForeground }}>Accent</span>
+                </div>
+                <div className="mt-4 rounded-md p-3" style={{ backgroundColor: palette.muted, color: palette.mutedForeground }}>
+                  Muted surface
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

@@ -10,7 +10,7 @@ const isRoute = (href: string) => href.startsWith("/");
 
 const DesktopNavLink = ({ link, scrolled }: { link: NavigationItem; scrolled: boolean }) => {
   const className = `text-sm font-medium transition-colors ${
-    scrolled ? "text-foreground hover:text-primary" : "text-white/80 hover:text-white"
+    scrolled ? "text-foreground hover:text-primary" : "text-hero-fg/80 hover:text-hero-fg"
   }`;
 
   if (link.is_external) {
@@ -95,7 +95,7 @@ const Navbar = () => {
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
           className={`md:hidden p-2 -mr-2 focus:outline-none focus:ring-2 focus:ring-primary ${
-            scrolled ? "text-foreground" : "text-white"
+            scrolled ? "text-foreground" : "text-hero-fg"
           }`}
           aria-label={mobileOpen ? "Close navigation" : "Open navigation"}
           aria-expanded={mobileOpen}

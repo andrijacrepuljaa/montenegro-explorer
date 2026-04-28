@@ -21,6 +21,23 @@ export async function fetchCmsContent<T extends object>(key: string, fallback: T
   return mergeCmsContent(fallback, data?.content);
 }
 
+export async function fetchCmsContentWithLegacy<T extends object>(
+  key: string,
+  fallback: T,
+  legacy?: { key: string; map: (content: unknown) => Partial<T> },
+) {
+  const { data, error } = await supabase.from("site_content").select("content").eq("key", key).maybeSingle();
+  if (error) throw error;
+  if (data?.content) return mergeCmsContent(fallback, data.content);
+  if (!legacy) return fallback;
+
+  const legacyResult = await supabase.from("site_content").select("content").eq("key", legacy.key).maybeSingle();
+  if (legacyResult.error) throw legacyResult.error;
+  if (!legacyResult.data?.content) return fallback;
+
+  return { ...fallback, ...legacy.map(legacyResult.data.content) };
+}
+
 export const newService = (sortOrder: number): ServiceDraft => ({
   title: "",
   short: "",

@@ -4,12 +4,12 @@ import { ArrowLeft, ArrowRight, Clock, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import kgcLogo from "@/assets/kgc-logo.png";
-import { defaultCareersPage } from "@/lib/cms";
-import { useSiteContent } from "@/hooks/useSiteContent";
+import { defaultInternshipsPage, extractInternshipsPageContent } from "@/lib/cms";
+import { useSiteContentWithLegacy } from "@/hooks/useSiteContent";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { getIconByName } from "@/lib/iconLibrary";
 
-interface CareerOpening {
+interface InternshipOpening {
   id: string;
   title: string;
   type: string;
@@ -18,9 +18,9 @@ interface CareerOpening {
   apply_url: string | null;
 }
 
-const careersSeo = {
-  title: "Careers at KGC",
-  description: "Build your career in management consulting with KGC.",
+const internshipsSeo = {
+  title: "Internships at KGC",
+  description: "Explore the KGC internship programme and current internship opportunities.",
 };
 
 const isExternalHref = (href: string) => /^(https?:\/\/|mailto:|tel:)/i.test(href);
@@ -46,17 +46,22 @@ function ActionLink({
   );
 }
 
-const Careers = () => {
-  const [openings, setOpenings] = useState<CareerOpening[]>([]);
-  const content = useSiteContent("careers.page", defaultCareersPage);
-  usePageSeo("careers", careersSeo);
+const Internships = () => {
+  const [openings, setOpenings] = useState<InternshipOpening[]>([]);
+  const content = useSiteContentWithLegacy(
+    "internships.page",
+    defaultInternshipsPage,
+    "careers.page",
+    extractInternshipsPageContent,
+  );
+  usePageSeo("internships", internshipsSeo);
 
   useEffect(() => {
     supabase
       .from("career_openings")
       .select("*")
       .eq("is_active", true)
-      .eq("tab", "careers")
+      .eq("tab", "internships")
       .order("sort_order")
       .then(({ data }) => {
         if (data) setOpenings(data);
@@ -91,14 +96,14 @@ const Careers = () => {
           </div>
 
           <aside className="rounded-md border border-border bg-card p-5 sm:p-6">
-            <p className="text-xs font-semibold uppercase tracking-wide text-primary">Also exploring internships?</p>
-            <h2 className="mt-2 text-lg font-semibold">{content.internshipsLinkTitle}</h2>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{content.internshipsLinkBody}</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">Also exploring full-time roles?</p>
+            <h2 className="mt-2 text-lg font-semibold">{content.careersLinkTitle}</h2>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{content.careersLinkBody}</p>
             <ActionLink
-              href={content.internshipsLinkHref}
+              href={content.careersLinkHref}
               className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary/80"
             >
-              {content.internshipsLinkLabel} <ArrowRight className="h-4 w-4" />
+              {content.careersLinkLabel} <ArrowRight className="h-4 w-4" />
             </ActionLink>
           </aside>
         </motion.div>
@@ -107,26 +112,53 @@ const Careers = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, delay: 0.05 }}
-          className="mt-12 sm:mt-16"
+          className="mt-12 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] sm:mt-16 sm:gap-16"
         >
-          <h2 className="mb-6 text-xl font-bold sm:text-2xl">{content.careersHeading}</h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-6">
-            {content.careerPerks.map((perk, index) => {
-              const Icon = getIconByName(perk.iconName);
-              return (
-                <motion.div
-                  key={perk.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.08 + index * 0.06 }}
-                  className="rounded-md border border-border p-5 transition-colors hover:border-primary/40 sm:p-6"
+          <div>
+            <h2 className="mb-4 text-xl font-bold sm:text-2xl">{content.programHeading}</h2>
+            <div className="space-y-4">
+              {content.programIntro.map((paragraph, index) => (
+                <p
+                  key={`${paragraph}-${index}`}
+                  className={index === 0 ? "text-base leading-relaxed text-muted-foreground sm:text-lg" : "text-sm leading-relaxed text-muted-foreground sm:text-base"}
                 >
-                  <Icon className="mb-3 h-6 w-6 text-primary sm:mb-4 sm:h-7 sm:w-7" />
-                  <h3 className="mb-2 text-base font-semibold sm:text-lg">{perk.title}</h3>
-                  <p className="text-sm leading-relaxed text-muted-foreground">{perk.description}</p>
-                </motion.div>
-              );
-            })}
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+
+            <div className="mt-8 sm:mt-10">
+              <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">{content.preferredFieldsHeading}</h3>
+              <div className="flex flex-wrap gap-2">
+                {content.preferredFields.map((field) => (
+                  <span key={field} className="rounded-md border border-border px-3 py-2 text-xs text-muted-foreground sm:px-4 sm:text-sm">
+                    {field}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h2 className="mb-6 text-xl font-bold sm:text-2xl">{content.perksHeading}</h2>
+            <div className="grid gap-4 sm:grid-cols-2 sm:gap-6">
+              {content.internPerks.map((perk, index) => {
+                const Icon = getIconByName(perk.iconName);
+                return (
+                  <motion.div
+                    key={perk.title}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.08 + index * 0.06 }}
+                    className="rounded-md border border-border p-5 transition-colors hover:border-primary/40 sm:p-6"
+                  >
+                    <Icon className="mb-3 h-6 w-6 text-primary sm:mb-4 sm:h-7 sm:w-7" />
+                    <h3 className="mb-2 text-base font-semibold sm:text-lg">{perk.title}</h3>
+                    <p className="text-sm leading-relaxed text-muted-foreground">{perk.description}</p>
+                  </motion.div>
+                );
+              })}
+            </div>
           </div>
         </motion.section>
 
@@ -136,27 +168,35 @@ const Careers = () => {
           transition={{ duration: 0.45, delay: 0.1 }}
           className="mt-12 sm:mt-16"
         >
-          <h2 className="mb-6 text-xl font-bold sm:text-2xl">{content.positionsHeading}</h2>
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-xl font-bold sm:text-2xl">{content.positionsHeading}</h2>
+              <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+                Open internships appear here automatically when you add them in the CMS.
+              </p>
+            </div>
+            <ActionLink
+              href={content.applyButtonHref}
+              className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm font-semibold transition-colors hover:bg-muted"
+            >
+              {content.applyButtonLabel} <ArrowRight className="h-4 w-4" />
+            </ActionLink>
+          </div>
+
           {openings.length === 0 ? (
             <div className="rounded-md border border-border p-5 sm:p-6">
               <h3 className="mb-2 text-base font-semibold sm:text-lg">{content.noOpeningsTitle}</h3>
-              <p className="mb-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">{content.noOpeningsBody}</p>
-              <ActionLink
-                href={content.talentPoolButtonHref}
-                className="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 sm:px-6"
-              >
-                Join Talent Pool <ArrowRight className="h-4 w-4" />
-              </ActionLink>
+              <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">{content.noOpeningsBody}</p>
             </div>
           ) : (
             <div className="space-y-4">
-              {openings.map((job, index) => {
-                const applyHref = job.apply_url || content.talentPoolButtonHref;
+              {openings.map((internship, index) => {
+                const applyHref = internship.apply_url || content.applyButtonHref;
                 const isExternal = /^https?:\/\//i.test(applyHref);
 
                 return (
                   <motion.div
-                    key={job.id}
+                    key={internship.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.18 + index * 0.06 }}
@@ -164,12 +204,12 @@ const Careers = () => {
                   >
                     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                       <div>
-                        <h3 className="mb-2 text-base font-semibold sm:text-lg">{job.title}</h3>
+                        <h3 className="mb-2 text-base font-semibold sm:text-lg">{internship.title}</h3>
                         <div className="mb-2 flex flex-wrap gap-3 text-sm text-muted-foreground sm:gap-4">
-                          <span className="inline-flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> {job.type}</span>
-                          <span className="inline-flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> {job.location}</span>
+                          <span className="inline-flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> {internship.type}</span>
+                          <span className="inline-flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> {internship.location}</span>
                         </div>
-                        <p className="text-sm text-muted-foreground">{job.description}</p>
+                        <p className="text-sm text-muted-foreground">{internship.description}</p>
                       </div>
                       <ActionLink
                         href={applyHref}
@@ -184,25 +224,9 @@ const Careers = () => {
             </div>
           )}
         </motion.section>
-
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, delay: 0.15 }}
-          className="mt-12 rounded-md border border-border p-6 text-center sm:mt-16 sm:p-8 lg:p-12"
-        >
-          <h3 className="mb-3 text-lg font-bold sm:text-xl">{content.talentPoolTitle}</h3>
-          <p className="mx-auto mb-6 max-w-md text-sm text-muted-foreground sm:text-base">{content.talentPoolBody}</p>
-          <ActionLink
-            href={content.talentPoolButtonHref}
-            className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 sm:px-8 sm:py-3.5"
-          >
-            {content.talentPoolButtonLabel} <ArrowRight className="h-4 w-4" />
-          </ActionLink>
-        </motion.section>
       </div>
     </div>
   );
 };
 
-export default Careers;
+export default Internships;

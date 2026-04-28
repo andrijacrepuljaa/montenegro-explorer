@@ -2,52 +2,28 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, MapPin, Linkedin, Send, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
-import { z } from "zod";
 import kgcLogo from "@/assets/kgc-logo.png";
 import { defaultCompanyContact, defaultContactPage } from "@/lib/cms";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { usePageSeo } from "@/hooks/usePageSeo";
-
-const contactSchema = z.object({
-  name: z.string().trim().min(1, "Name is required").max(100),
-  email: z.string().trim().email("Please enter a valid email").max(255),
-  company: z.string().trim().max(100).optional(),
-  subject: z.string().trim().min(1, "Subject is required").max(200),
-  message: z.string().trim().min(1, "Message is required").max(2000),
-});
-
-type ContactForm = z.infer<typeof contactSchema>;
+import { buildContactMailtoLink, contactSchema, contactTopicOptions, type ContactFormDraft } from "@/lib/contactForm";
 
 const contactSeo = {
   title: "Contact KGC",
   description: "Start a conversation with KGC about your project, operations, or growth challenge.",
 };
 
-const buildMailtoLink = (form: ContactForm, contactEmail: string) => {
-  const body = [
-    `Name: ${form.name}`,
-    `Email: ${form.email}`,
-    form.company ? `Company: ${form.company}` : null,
-    "",
-    form.message,
-  ]
-    .filter((line): line is string => line !== null)
-    .join("\n");
-
-  return `mailto:${contactEmail}?subject=${encodeURIComponent(form.subject)}&body=${encodeURIComponent(body)}`;
-};
-
 const Contact = () => {
-  const [form, setForm] = useState<ContactForm>({
+  const [form, setForm] = useState<ContactFormDraft>({
     name: "", email: "", company: "", subject: "", message: "",
   });
-  const [errors, setErrors] = useState<Partial<Record<keyof ContactForm, string>>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof ContactFormDraft, string>>>({});
   const [submitted, setSubmitted] = useState(false);
   const content = useSiteContent("contact.page", defaultContactPage);
   const contact = useSiteContent("company.contact", defaultCompanyContact);
   usePageSeo("contact", contactSeo);
 
-  const handleChange = (field: keyof ContactForm, value: string) => {
+  const handleChange = (field: keyof ContactFormDraft, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors(prev => ({ ...prev, [field]: undefined }));
   };
@@ -56,14 +32,15 @@ const Contact = () => {
     e.preventDefault();
     const result = contactSchema.safeParse(form);
     if (!result.success) {
-      const fieldErrors: Partial<Record<keyof ContactForm, string>> = {};
+      const fieldErrors: Partial<Record<keyof ContactFormDraft, string>> = {};
       result.error.issues.forEach(issue => {
-        fieldErrors[issue.path[0] as keyof ContactForm] = issue.message;
+        fieldErrors[issue.path[0] as keyof ContactFormDraft] = issue.message;
       });
       setErrors(fieldErrors);
       return;
     }
-    window.location.href = buildMailtoLink(result.data, contact.email);
+
+    window.location.href = buildContactMailtoLink(result.data, contact.email);
     setSubmitted(true);
   };
 
@@ -114,11 +91,11 @@ const Contact = () => {
                   <div className="w-14 h-14 bg-primary/10 flex items-center justify-center mx-auto mb-6">
                     <Send className="w-6 h-6 text-primary" />
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-bold mb-3">{content.successTitle}</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold mb-3">Your draft is ready</h3>
                   <p className="text-muted-foreground mb-6">
-                    {content.successBody}
+                    We opened your default email app with your topic, contact details, and message already prepared.
                   </p>
-                  <button onClick={() => { setSubmitted(false); setForm({ name: "", email: "", company: "", subject: "", message: "" }); }} className="text-sm text-primary hover:underline">
+                  <button onClick={() => { setSubmitted(false); setErrors({}); setForm({ name: "", email: "", company: "", subject: "", message: "" }); }} className="text-sm text-primary hover:underline">
                     Prepare another message
                   </button>
                 </div>
@@ -146,7 +123,14 @@ const Contact = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1.5">Subject *</label>
-                      <input type="text" value={form.subject} onChange={e => handleChange("subject", e.target.value)} className={inputClass} placeholder="How can we help?" />
+                      <select value={form.subject} onChange={e => handleChange("subject", e.target.value)} className={inputClass}>
+                        <option value="" disabled>Choose a topic</option>
+                        {contactTopicOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
                       {errors.subject && <p className="text-destructive text-xs mt-1">{errors.subject}</p>}
                     </div>
                   </div>
@@ -155,7 +139,10 @@ const Contact = () => {
                     <textarea value={form.message} onChange={e => handleChange("message", e.target.value)} rows={6} className={`${inputClass} resize-none`} placeholder="Tell us about your project or inquiry..." />
                     {errors.message && <p className="text-destructive text-xs mt-1">{errors.message}</p>}
                   </div>
-                  <button type="submit" className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity">
+                  <button
+                    type="submit"
+                    className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 bg-primary text-primary-foreground font-semibold text-sm transition-opacity hover:opacity-90"
+                  >
                     <Send className="w-4 h-4" /> Open Email Draft
                   </button>
                 </form>
