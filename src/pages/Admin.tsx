@@ -112,16 +112,16 @@ const Admin = () => {
   if (!isAdmin) return null;
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 border-r border-border bg-background lg:block">
-        <div className="flex h-16 items-center gap-3 border-b border-border px-6">
+      <div className="min-h-screen bg-muted/30">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 border-r border-border bg-background lg:flex lg:flex-col">
+        <div className="flex h-16 shrink-0 items-center gap-3 border-b border-border px-6">
           <img src={kgcLogo} alt="KGC" className="h-8" />
           <div>
             <p className="text-sm font-bold leading-none">KGC Admin</p>
             <p className="mt-1 text-xs text-muted-foreground">Content manager</p>
           </div>
         </div>
-        <nav className="space-y-1 p-3">
+        <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto p-3">
           {adminSections.map((section) => (
             <button
               key={section.id}

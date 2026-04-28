@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Clock, MapPin } from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarDays, Clock, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import kgcLogo from "@/assets/kgc-logo.png";
@@ -8,6 +8,7 @@ import { defaultCareersPage } from "@/lib/cms";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { getIconByName } from "@/lib/iconLibrary";
+import { formatClosingDate } from "@/lib/openings";
 
 interface CareerOpening {
   id: string;
@@ -15,7 +16,9 @@ interface CareerOpening {
   type: string;
   location: string;
   description: string;
+  requirements: string[] | null;
   apply_url: string | null;
+  closing_date: string | null;
 }
 
 const careersSeo = {
@@ -152,7 +155,7 @@ const Careers = () => {
             <div className="space-y-4">
               {openings.map((job, index) => {
                 const applyHref = job.apply_url || content.talentPoolButtonHref;
-                const isExternal = /^https?:\/\//i.test(applyHref);
+                const closingDate = formatClosingDate(job.closing_date);
 
                 return (
                   <motion.div
@@ -168,8 +171,24 @@ const Careers = () => {
                         <div className="mb-2 flex flex-wrap gap-3 text-sm text-muted-foreground sm:gap-4">
                           <span className="inline-flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> {job.type}</span>
                           <span className="inline-flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> {job.location}</span>
+                          {closingDate ? (
+                            <span className="inline-flex items-center gap-1.5"><CalendarDays className="h-3.5 w-3.5" /> Closes {closingDate}</span>
+                          ) : null}
                         </div>
                         <p className="text-sm text-muted-foreground">{job.description}</p>
+                        {job.requirements && job.requirements.length > 0 ? (
+                          <div className="mt-4">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Requirements</p>
+                            <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
+                              {job.requirements.filter(Boolean).map((requirement) => (
+                                <li key={requirement} className="flex items-start gap-2">
+                                  <span className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                                  <span>{requirement}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ) : null}
                       </div>
                       <ActionLink
                         href={applyHref}

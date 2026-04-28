@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Clock, MapPin } from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarDays, Clock, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import kgcLogo from "@/assets/kgc-logo.png";
@@ -8,6 +8,7 @@ import { defaultInternshipsPage, extractInternshipsPageContent } from "@/lib/cms
 import { useSiteContentWithLegacy } from "@/hooks/useSiteContent";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { getIconByName } from "@/lib/iconLibrary";
+import { formatClosingDate } from "@/lib/openings";
 
 interface InternshipOpening {
   id: string;
@@ -15,7 +16,9 @@ interface InternshipOpening {
   type: string;
   location: string;
   description: string;
+  requirements: string[] | null;
   apply_url: string | null;
+  closing_date: string | null;
 }
 
 const internshipsSeo = {
@@ -192,7 +195,7 @@ const Internships = () => {
             <div className="space-y-4">
               {openings.map((internship, index) => {
                 const applyHref = internship.apply_url || content.applyButtonHref;
-                const isExternal = /^https?:\/\//i.test(applyHref);
+                const closingDate = formatClosingDate(internship.closing_date);
 
                 return (
                   <motion.div
@@ -208,8 +211,24 @@ const Internships = () => {
                         <div className="mb-2 flex flex-wrap gap-3 text-sm text-muted-foreground sm:gap-4">
                           <span className="inline-flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> {internship.type}</span>
                           <span className="inline-flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> {internship.location}</span>
+                          {closingDate ? (
+                            <span className="inline-flex items-center gap-1.5"><CalendarDays className="h-3.5 w-3.5" /> Closes {closingDate}</span>
+                          ) : null}
                         </div>
                         <p className="text-sm text-muted-foreground">{internship.description}</p>
+                        {internship.requirements && internship.requirements.length > 0 ? (
+                          <div className="mt-4">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Requirements</p>
+                            <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
+                              {internship.requirements.filter(Boolean).map((requirement) => (
+                                <li key={requirement} className="flex items-start gap-2">
+                                  <span className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                                  <span>{requirement}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ) : null}
                       </div>
                       <ActionLink
                         href={applyHref}

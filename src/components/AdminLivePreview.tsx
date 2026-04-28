@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { ArrowRight, Briefcase, Mail, MapPin, Sparkles } from "lucide-react";
+import { ArrowRight, Briefcase, CalendarDays, Mail, MapPin, Sparkles } from "lucide-react";
 import type {
   CareersPageContent,
   CompanyContactContent,
@@ -12,6 +12,7 @@ import type {
 import type { MilestoneDraft, ServiceDraft } from "@/lib/adminCms";
 import { mutedLabelClass, panelClass } from "@/lib/adminUi";
 import { getIconByName } from "@/lib/iconLibrary";
+import { formatClosingDate } from "@/lib/openings";
 import { cn } from "@/lib/utils";
 
 function PreviewFrame({
@@ -358,6 +359,8 @@ export function OpeningsListPreview({
     type: string;
     location: string;
     description: string;
+    requirements?: string[] | null;
+    closing_date?: string | null;
     is_active: boolean;
   }>;
 }) {
@@ -377,8 +380,24 @@ export function OpeningsListPreview({
                 <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
                   <span className="inline-flex items-center gap-1.5"><Briefcase className="h-3.5 w-3.5" /> {item.type || "Type"}</span>
                   <span className="inline-flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> {item.location || "Location"}</span>
+                  {item.closing_date ? (
+                    <span className="inline-flex items-center gap-1.5"><CalendarDays className="h-3.5 w-3.5" /> Closes {formatClosingDate(item.closing_date)}</span>
+                  ) : null}
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">{item.description || "Opening description"}</p>
+                {item.requirements && item.requirements.filter(Boolean).length > 0 ? (
+                  <div className="mt-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Requirements</p>
+                    <ul className="mt-2 space-y-1.5 text-xs text-muted-foreground">
+                      {item.requirements.filter(Boolean).slice(0, 4).map((requirement) => (
+                        <li key={requirement} className="flex items-start gap-2">
+                          <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                          <span>{requirement}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>
