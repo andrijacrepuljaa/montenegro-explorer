@@ -92,6 +92,8 @@ export type InternshipsPageContent = {
   positionsHeading: string;
   noOpeningsTitle: string;
   noOpeningsBody: string;
+  applicationCtaTitle: string;
+  applicationCtaBody: string;
   preferredFieldsHeading: string;
   preferredFields: string[];
   applyButtonLabel: string;
@@ -313,9 +315,12 @@ export const defaultInternshipsPage: InternshipsPageContent = {
   noOpeningsTitle: "No internship positions are open right now",
   noOpeningsBody:
     "We still welcome strong student and graduate profiles in supply chain, project management, digital marketing, data analytics, and business strategy.",
+  applicationCtaTitle: "Don't see the right internship?",
+  applicationCtaBody:
+    "We're always looking for exceptional early-career talent. Send us your profile and we'll keep you in mind for future internship openings.",
   preferredFieldsHeading: defaultLegacyCareersPage.preferredFieldsHeading,
   preferredFields: defaultLegacyCareersPage.preferredFields,
-  applyButtonLabel: "Apply for Internship",
+  applyButtonLabel: "Send Your CV",
   applyButtonHref: "/contact",
   careersLinkTitle: "Looking for a full-time role?",
   careersLinkBody: "Browse current consulting openings and our talent pool call for experienced professionals.",
@@ -439,6 +444,22 @@ export function extractInternshipsPageContent(content: unknown): Partial<Interns
       Array.isArray(content.internshipIntro)
         ? content.internshipIntro.filter((item): item is string => typeof item === "string")
         : defaultInternshipsPage.programIntro,
+    noOpeningsTitle:
+      typeof content.noOpeningsTitle === "string"
+        ? content.noOpeningsTitle
+        : defaultInternshipsPage.noOpeningsTitle,
+    noOpeningsBody:
+      typeof content.noOpeningsBody === "string"
+        ? content.noOpeningsBody
+        : defaultInternshipsPage.noOpeningsBody,
+    applicationCtaTitle:
+      typeof content.talentPoolTitle === "string"
+        ? content.talentPoolTitle
+        : defaultInternshipsPage.applicationCtaTitle,
+    applicationCtaBody:
+      typeof content.talentPoolBody === "string"
+        ? content.talentPoolBody
+        : defaultInternshipsPage.applicationCtaBody,
     preferredFieldsHeading:
       typeof content.preferredFieldsHeading === "string"
         ? content.preferredFieldsHeading
@@ -447,6 +468,14 @@ export function extractInternshipsPageContent(content: unknown): Partial<Interns
       Array.isArray(content.preferredFields)
         ? content.preferredFields.filter((item): item is string => typeof item === "string")
         : defaultInternshipsPage.preferredFields,
+    applyButtonLabel:
+      typeof content.talentPoolButtonLabel === "string"
+        ? content.talentPoolButtonLabel
+        : defaultInternshipsPage.applyButtonLabel,
+    applyButtonHref:
+      typeof content.applyButtonHref === "string"
+        ? content.applyButtonHref
+        : defaultInternshipsPage.applyButtonHref,
     internPerks:
       Array.isArray(content.internPerks)
         ? (content.internPerks as IconContentItem[])

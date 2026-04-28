@@ -327,10 +327,10 @@ export function InternshipsPagePreview({
       <PreviewBlock title="Page CTAs" active={hasFocus(activePanel, ["internship-ctas"])}>
         <div className="space-y-3">
           <div className="rounded-md border border-border bg-card p-4">
-            <p className="text-sm font-semibold">{content.positionsHeading || "Open internships"}</p>
-            <p className="mt-2 text-sm text-muted-foreground">{content.noOpeningsBody || "No openings copy"}</p>
+            <p className="text-sm font-semibold">{content.applicationCtaTitle || "Bottom CTA title"}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{content.applicationCtaBody || "Bottom CTA body copy"}</p>
             <span className="mt-3 inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground">
-              {content.applyButtonLabel || "Apply for internship"} <ArrowRight className="h-3.5 w-3.5" />
+              {content.applyButtonLabel || "Send your CV"} <ArrowRight className="h-3.5 w-3.5" />
             </span>
           </div>
           <div className="rounded-md border border-border bg-card p-4">

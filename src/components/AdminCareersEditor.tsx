@@ -465,12 +465,16 @@ export function InternshipsPageEditor({
             <p className={mutedLabelClass}>Calls to action</p>
             <div className="mt-4 grid gap-4 lg:grid-cols-2">
               <Field label="Openings heading"><input className={inputClass} value={content.positionsHeading} onChange={(event) => { setContent({ ...content, positionsHeading: event.target.value }); setDirty(true); }} /></Field>
-              <Field label="Apply button label"><input className={inputClass} value={content.applyButtonLabel} onChange={(event) => { setContent({ ...content, applyButtonLabel: event.target.value }); setDirty(true); }} /></Field>
               <Field label="No openings title"><input className={inputClass} value={content.noOpeningsTitle} onChange={(event) => { setContent({ ...content, noOpeningsTitle: event.target.value }); setDirty(true); }} /></Field>
-              <Field label="Apply button link"><input className={inputClass} value={content.applyButtonHref} onChange={(event) => { setContent({ ...content, applyButtonHref: event.target.value }); setDirty(true); }} /></Field>
+              <Field label="Bottom CTA title"><input className={inputClass} value={content.applicationCtaTitle} onChange={(event) => { setContent({ ...content, applicationCtaTitle: event.target.value }); setDirty(true); }} /></Field>
+              <Field label="Bottom CTA button label"><input className={inputClass} value={content.applyButtonLabel} onChange={(event) => { setContent({ ...content, applyButtonLabel: event.target.value }); setDirty(true); }} /></Field>
               <div className="lg:col-span-2">
                 <Field label="No openings body"><textarea className={areaClass} value={content.noOpeningsBody} onChange={(event) => { setContent({ ...content, noOpeningsBody: event.target.value }); setDirty(true); }} /></Field>
               </div>
+              <div className="lg:col-span-2">
+                <Field label="Bottom CTA body"><textarea className={areaClass} value={content.applicationCtaBody} onChange={(event) => { setContent({ ...content, applicationCtaBody: event.target.value }); setDirty(true); }} /></Field>
+              </div>
+              <Field label="Bottom CTA button link"><input className={inputClass} value={content.applyButtonHref} onChange={(event) => { setContent({ ...content, applyButtonHref: event.target.value }); setDirty(true); }} /></Field>
               <Field label="Careers card title"><input className={inputClass} value={content.careersLinkTitle} onChange={(event) => { setContent({ ...content, careersLinkTitle: event.target.value }); setDirty(true); }} /></Field>
               <Field label="Careers button label"><input className={inputClass} value={content.careersLinkLabel} onChange={(event) => { setContent({ ...content, careersLinkLabel: event.target.value }); setDirty(true); }} /></Field>
               <div className="lg:col-span-2">

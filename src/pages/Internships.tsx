@@ -171,20 +171,7 @@ const Internships = () => {
           transition={{ duration: 0.45, delay: 0.1 }}
           className="mt-12 sm:mt-16"
         >
-          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h2 className="text-xl font-bold sm:text-2xl">{content.positionsHeading}</h2>
-              <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-                Open internships appear here automatically when you add them in the CMS.
-              </p>
-            </div>
-            <ActionLink
-              href={content.applyButtonHref}
-              className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm font-semibold transition-colors hover:bg-muted"
-            >
-              {content.applyButtonLabel} <ArrowRight className="h-4 w-4" />
-            </ActionLink>
-          </div>
+          <h2 className="mb-6 text-xl font-bold sm:text-2xl">{content.positionsHeading}</h2>
 
           {openings.length === 0 ? (
             <div className="rounded-md border border-border p-5 sm:p-6">
@@ -242,6 +229,22 @@ const Internships = () => {
               })}
             </div>
           )}
+        </motion.section>
+
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.15 }}
+          className="mt-12 rounded-md border border-border p-6 text-center sm:mt-16 sm:p-8 lg:p-12"
+        >
+          <h3 className="mb-3 text-lg font-bold sm:text-xl">{content.applicationCtaTitle}</h3>
+          <p className="mx-auto mb-6 max-w-md text-sm text-muted-foreground sm:text-base">{content.applicationCtaBody}</p>
+          <ActionLink
+            href={content.applyButtonHref}
+            className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 sm:px-8 sm:py-3.5"
+          >
+            {content.applyButtonLabel} <ArrowRight className="h-4 w-4" />
+          </ActionLink>
         </motion.section>
       </div>
     </div>
