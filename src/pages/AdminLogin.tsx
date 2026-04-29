@@ -3,6 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import kgcLogo from "@/assets/kgc-logo.png";
 
+const getAuthErrorMessage = (message: string) => {
+  if (/failed to fetch/i.test(message)) {
+    return "Cannot reach Supabase from this local app. Check your local .env Supabase URL, project ID, and network/DNS setup.";
+  }
+
+  return message;
+};
+
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -14,12 +22,18 @@ const AdminLogin = () => {
     e.preventDefault();
     setError("");
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      setError(error.message);
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        setError(getAuthErrorMessage(error.message));
+        setLoading(false);
+      } else {
+        navigate("/admin");
+      }
+    } catch (error) {
+      setError(getAuthErrorMessage(error instanceof Error ? error.message : "Login failed."));
       setLoading(false);
-    } else {
-      navigate("/admin");
     }
   };
 

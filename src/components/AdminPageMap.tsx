@@ -1,4 +1,4 @@
-import { Briefcase, Contact, FileText, GraduationCap, Home, Image, Milestone, Navigation, Palette, Sparkles } from "lucide-react";
+import { Briefcase, Contact, FileText, GraduationCap, Home, Image, LayoutTemplate, Milestone, Navigation, Palette, Sparkles } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { mutedLabelClass, panelClass } from "@/lib/adminUi";
@@ -100,6 +100,18 @@ const mapCards: MapCard[] = [
     panels: [
       { section: "contact", panel: "company-details", label: "Company Details" },
       { section: "contact", panel: "contact-page-copy", label: "Page Copy" },
+    ],
+  },
+  {
+    id: "page-sections",
+    title: "Page Sections",
+    description: "Add reusable sections like case studies, milestone blocks, stats, or CTAs to the existing site pages.",
+    icon: LayoutTemplate,
+    preview: [72, 28, 42, 18],
+    panels: [
+      { section: "page-sections", panel: "page-sections-pages", label: "Pages" },
+      { section: "page-sections", panel: "page-sections-existing", label: "Built-in" },
+      { section: "page-sections", panel: "page-sections-builder", label: "Builder" },
     ],
   },
   {

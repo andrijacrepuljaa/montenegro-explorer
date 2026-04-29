@@ -3,9 +3,11 @@ import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Network, Warehouse, PackageSearch, DollarSign, ClipboardCheck, ShieldAlert, Megaphone, Palette, ArrowRight, X, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { defaultExpertiseIntro } from "@/lib/cms";
+import { defaultExpertiseIntro, type SectionIntroContent } from "@/lib/cms";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { getIconByName } from "@/lib/iconLibrary";
+import type { PageSurface, TemplateServiceItem } from "@/lib/pageSections";
+import { cn } from "@/lib/utils";
 
 const fallbackServices = [
   { icon: Network, title: "Supply Chain Network Design", short: "How many production or distribution facilities is the right fit for my business purpose?", detail: "We combine sound business knowledge with our linear modelling based approach to (re)define parts or the whole end-to-end supply chain network.", benefits: ["End-to-end network optimization", "Linear modelling-based approach", "Facility location analysis", "Cost-to-serve optimization", "Scenario planning & simulation"], category: "Supply Chain" },
@@ -44,17 +46,49 @@ const getFillerCount = (itemCount: number, columns: number) => {
   return (columns - (itemCount % columns)) % columns;
 };
 
-const ExpertiseSection = () => {
+const mapTemplateServices = (items: TemplateServiceItem[]) =>
+  items.map((item) => ({
+    icon: getIconByName(item.iconName, Network),
+    title: item.title,
+    short: item.short,
+    detail: item.detail,
+    benefits: item.benefits,
+    category: item.category,
+  }));
+
+const ExpertiseSection = ({
+  sectionId = "expertise",
+  introContent,
+  servicesData,
+  surface = "dark",
+  embedded = false,
+}: {
+  sectionId?: string;
+  introContent?: SectionIntroContent;
+  servicesData?: TemplateServiceItem[];
+  surface?: PageSurface;
+  embedded?: boolean;
+}) => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
   const navigate = useNavigate();
   const [expandedService, setExpandedService] = useState<number | null>(null);
-  const [services, setServices] = useState(fallbackServices);
-  const intro = useSiteContent("home.expertise", defaultExpertiseIntro);
+  const [services, setServices] = useState(() => (servicesData && servicesData.length > 0 ? mapTemplateServices(servicesData) : fallbackServices));
+  const storedIntro = useSiteContent("home.expertise", defaultExpertiseIntro);
+  const intro = introContent || storedIntro;
+  const isDark = surface === "dark";
+  const containerClass = embedded
+    ? "mx-auto max-w-full px-0"
+    : "max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12";
   const tabletFillerCount = getFillerCount(services.length, 2);
   const desktopFillerCount = getFillerCount(services.length, 4);
 
   useEffect(() => {
+    if (servicesData && servicesData.length > 0) {
+      setServices(mapTemplateServices(servicesData));
+      return;
+    }
+
     supabase
       .from("services")
       .select("*")
@@ -77,12 +111,12 @@ const ExpertiseSection = () => {
           );
         }
       });
-  }, []);
+  }, [servicesData]);
 
   return (
     <>
-      <section id="expertise" className="section-dark py-16 sm:py-24 lg:py-32">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12" ref={ref}>
+      <section id={sectionId} className={cn("py-16 sm:py-24 lg:py-32", isDark && "section-dark")}>
+        <div className={containerClass} ref={ref}>
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -90,14 +124,14 @@ const ExpertiseSection = () => {
             className="max-w-2xl mb-10 sm:mb-16"
           >
             <div className="accent-bar mb-6" />
-            <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold tracking-tight mb-4">{intro.headline}</h2>
-            <p className="text-hero-fg/60 text-base sm:text-lg">
+            <h2 className={cn("text-2xl sm:text-3xl md:text-5xl font-bold tracking-tight mb-4", isDark && "text-hero-fg")}>{intro.headline}</h2>
+            <p className={cn("text-base sm:text-lg", isDark ? "text-hero-fg/60" : "text-muted-foreground")}>
               {intro.intro}
             </p>
           </motion.div>
 
           {/* Responsive grid: handles any number of cards gracefully */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-dark-border">
+          <div className={cn("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px", isDark ? "bg-dark-border" : "bg-border")}>
             {services.map((s, i) => (
               <motion.button
                 key={s.title}
@@ -106,13 +140,18 @@ const ExpertiseSection = () => {
                 animate={inView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.4, delay: i * 0.05 }}
                 onClick={() => setExpandedService(i)}
-                className="cursor-pointer p-6 sm:p-8 bg-hero-bg hover:bg-dark-surface focus:bg-dark-surface focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-hero-bg transition-all group relative text-left"
+                className={cn(
+                  "cursor-pointer p-6 sm:p-8 focus:outline-none focus:ring-2 focus:ring-primary transition-all group relative text-left",
+                  isDark
+                    ? "bg-hero-bg hover:bg-dark-surface focus:bg-dark-surface focus:ring-offset-2 focus:ring-offset-hero-bg"
+                    : "bg-background hover:bg-muted focus:bg-muted focus:ring-offset-2 focus:ring-offset-background",
+                )}
                 aria-haspopup="dialog"
               >
                 <p className="text-xs font-medium text-primary uppercase tracking-wider mb-3 sm:mb-4">{s.category}</p>
-                <s.icon className="w-6 sm:w-7 h-6 sm:h-7 text-hero-fg/40 group-hover:text-primary transition-colors mb-4 sm:mb-5" />
-                <h3 className="font-semibold text-base sm:text-lg mb-2 sm:mb-3 text-hero-fg">{s.title}</h3>
-                <p className="text-sm text-hero-fg/65 leading-relaxed mb-3 sm:mb-4">{s.short}</p>
+                <s.icon className={cn("w-6 sm:w-7 h-6 sm:h-7 group-hover:text-primary transition-colors mb-4 sm:mb-5", isDark ? "text-hero-fg/40" : "text-muted-foreground")} />
+                <h3 className={cn("font-semibold text-base sm:text-lg mb-2 sm:mb-3", isDark && "text-hero-fg")}>{s.title}</h3>
+                <p className={cn("text-sm leading-relaxed mb-3 sm:mb-4", isDark ? "text-hero-fg/65" : "text-muted-foreground")}>{s.short}</p>
                 <span className="inline-flex items-center gap-1 text-xs text-primary font-medium">
                   View details <ChevronRight className="w-3 h-3" />
                 </span>
@@ -122,14 +161,14 @@ const ExpertiseSection = () => {
               <div
                 key={`tablet-filler-${index}`}
                 aria-hidden="true"
-                className="hidden bg-hero-bg sm:block lg:hidden"
+                className={cn("hidden sm:block lg:hidden", isDark ? "bg-hero-bg" : "bg-background")}
               />
             ))}
             {Array.from({ length: desktopFillerCount }).map((_, index) => (
               <div
                 key={`desktop-filler-${index}`}
                 aria-hidden="true"
-                className="hidden bg-hero-bg lg:block"
+                className={cn("hidden lg:block", isDark ? "bg-hero-bg" : "bg-background")}
               />
             ))}
           </div>

@@ -3,13 +3,17 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
 import { defaultHomeHero } from "@/lib/cms";
-import { useSiteContent } from "@/hooks/useSiteContent";
+import { usePageStructure, useSiteContent } from "@/hooks/useSiteContent";
+import { getStructureSection } from "@/lib/pageSections";
 
-const HeroSection = () => {
+const HeroSection = ({ sectionId = "hero" }: { sectionId?: string }) => {
   const hero = useSiteContent("home.hero", defaultHomeHero);
+  const structure = usePageStructure("home");
+  const expertiseAnchor = getStructureSection(structure, "expertise")?.anchor || "expertise";
+  const primaryCtaHref = hero.primaryCtaHref === "#expertise" ? `#${expertiseAnchor}` : hero.primaryCtaHref;
 
   return (
-    <section id="hero" className="relative min-h-[760px] sm:min-h-[82vh] flex items-center section-dark overflow-hidden">
+    <section id={sectionId} className="relative min-h-[760px] sm:min-h-[82vh] flex items-center section-dark overflow-hidden">
       <div className="absolute inset-0 overflow-hidden">
         <img src={heroBg} alt="" className="absolute inset-0 h-full w-full object-cover opacity-40" />
         <div className="absolute inset-0 bg-hero-bg/80" />
@@ -26,7 +30,7 @@ const HeroSection = () => {
             {hero.intro}
           </p>
           <div className="flex gap-3 sm:gap-4 flex-wrap">
-            <a href={hero.primaryCtaHref} className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity">
+            <a href={primaryCtaHref} className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity">
               {hero.primaryCtaLabel} <ArrowRight className="w-4 h-4" />
             </a>
             <Link to={hero.secondaryCtaHref} className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 border border-hero-fg/30 text-hero-fg font-semibold text-sm hover:bg-hero-fg/10 transition-colors">

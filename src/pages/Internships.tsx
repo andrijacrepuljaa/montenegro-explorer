@@ -3,12 +3,15 @@ import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, CalendarDays, Clock, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { PageSectionsRenderer } from "@/components/FlexibleSectionsRenderer";
 import kgcLogo from "@/assets/kgc-logo.png";
 import { defaultInternshipsPage, extractInternshipsPageContent } from "@/lib/cms";
-import { useSiteContentWithLegacy } from "@/hooks/useSiteContent";
+import { usePageSections, usePageStructure, useSiteContentWithLegacy } from "@/hooks/useSiteContent";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { getIconByName } from "@/lib/iconLibrary";
 import { formatClosingDate } from "@/lib/openings";
+import { getFlexibleSectionSurfaceMap, getSectionsForPlacement, getStructureSection, type PageSurface } from "@/lib/pageSections";
+import { cn } from "@/lib/utils";
 
 interface InternshipOpening {
   id: string;
@@ -49,6 +52,12 @@ function ActionLink({
   );
 }
 
+const pageSectionClass = (surface: PageSurface, first = false) =>
+  cn(
+    !first && "pt-12 sm:pt-16",
+    surface === "dark" && "section-dark -mx-4 px-4 pb-12 sm:-mx-6 sm:px-6 sm:pb-16 lg:-mx-12 lg:px-12",
+  );
+
 const Internships = () => {
   const [openings, setOpenings] = useState<InternshipOpening[]>([]);
   const content = useSiteContentWithLegacy(
@@ -57,6 +66,8 @@ const Internships = () => {
     "careers.page",
     extractInternshipsPageContent,
   );
+  const flexibleSections = usePageSections("internships");
+  const structure = usePageStructure("internships");
   usePageSeo("internships", internshipsSeo);
 
   useEffect(() => {
@@ -70,6 +81,24 @@ const Internships = () => {
         if (data) setOpenings(data);
       });
   }, []);
+
+  const showHero = getStructureSection(structure, "hero")?.visible !== false;
+  const showProgramme = getStructureSection(structure, "programme")?.visible !== false;
+  const showOpenings = getStructureSection(structure, "openings")?.visible !== false;
+  const showApplicationCta = getStructureSection(structure, "application-cta")?.visible !== false;
+  const heroSection = getStructureSection(structure, "hero");
+  const programmeSection = getStructureSection(structure, "programme");
+  const openingsSection = getStructureSection(structure, "openings");
+  const applicationCtaSection = getStructureSection(structure, "application-cta");
+  const flexibleSectionSurfaces = getFlexibleSectionSurfaceMap("internships", flexibleSections, structure);
+  const heroSurface = flexibleSectionSurfaces.hero || "light";
+  const programmeSurface = flexibleSectionSurfaces.programme || "light";
+  const openingsSurface = flexibleSectionSurfaces.openings || "light";
+  const applicationCtaSurface = flexibleSectionSurfaces["application-cta"] || "light";
+  const isHeroDark = heroSurface === "dark";
+  const isProgrammeDark = programmeSurface === "dark";
+  const isOpeningsDark = openingsSurface === "dark";
+  const isApplicationCtaDark = applicationCtaSurface === "dark";
 
   return (
     <div className="min-h-screen bg-background">
@@ -86,166 +115,210 @@ const Internships = () => {
       </nav>
 
       <div className="mx-auto max-w-[1400px] px-4 py-12 sm:px-6 sm:py-20 lg:px-12">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start"
-        >
-          <div>
-            <div className="accent-bar mb-6" />
-            <h1 className="mb-4 text-2xl font-bold tracking-tight sm:text-3xl md:text-5xl">{content.headline}</h1>
-            <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">{content.intro}</p>
-          </div>
-
-          <aside className="rounded-md border border-border bg-card p-5 sm:p-6">
-            <p className="text-xs font-semibold uppercase tracking-wide text-primary">Also exploring full-time roles?</p>
-            <h2 className="mt-2 text-lg font-semibold">{content.careersLinkTitle}</h2>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{content.careersLinkBody}</p>
-            <ActionLink
-              href={content.careersLinkHref}
-              className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary/80"
+        {showHero ? (
+          <section className={pageSectionClass(heroSurface, true)}>
+            <motion.div
+              id={heroSection?.anchor}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start"
             >
-              {content.careersLinkLabel} <ArrowRight className="h-4 w-4" />
-            </ActionLink>
-          </aside>
-        </motion.div>
-
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, delay: 0.05 }}
-          className="mt-12 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] sm:mt-16 sm:gap-16"
-        >
-          <div>
-            <h2 className="mb-4 text-xl font-bold sm:text-2xl">{content.programHeading}</h2>
-            <div className="space-y-4">
-              {content.programIntro.map((paragraph, index) => (
-                <p
-                  key={`${paragraph}-${index}`}
-                  className={index === 0 ? "text-base leading-relaxed text-muted-foreground sm:text-lg" : "text-sm leading-relaxed text-muted-foreground sm:text-base"}
-                >
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-
-            <div className="mt-8 sm:mt-10">
-              <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">{content.preferredFieldsHeading}</h3>
-              <div className="flex flex-wrap gap-2">
-                {content.preferredFields.map((field) => (
-                  <span key={field} className="rounded-md border border-border px-3 py-2 text-xs text-muted-foreground sm:px-4 sm:text-sm">
-                    {field}
-                  </span>
-                ))}
+              <div>
+                <div className="accent-bar mb-6" />
+                <h1 className={cn("mb-4 text-2xl font-bold tracking-tight sm:text-3xl md:text-5xl", isHeroDark && "text-hero-fg")}>{content.headline}</h1>
+                <p className={cn("max-w-2xl text-base sm:text-lg", isHeroDark ? "text-hero-fg/70" : "text-muted-foreground")}>{content.intro}</p>
               </div>
-            </div>
-          </div>
 
-          <div>
-            <h2 className="mb-6 text-xl font-bold sm:text-2xl">{content.perksHeading}</h2>
-            <div className="grid gap-4 sm:grid-cols-2 sm:gap-6">
-              {content.internPerks.map((perk, index) => {
-                const Icon = getIconByName(perk.iconName);
-                return (
-                  <motion.div
-                    key={perk.title}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.08 + index * 0.06 }}
-                    className="rounded-md border border-border p-5 transition-colors hover:border-primary/40 sm:p-6"
-                  >
-                    <Icon className="mb-3 h-6 w-6 text-primary sm:mb-4 sm:h-7 sm:w-7" />
-                    <h3 className="mb-2 text-base font-semibold sm:text-lg">{perk.title}</h3>
-                    <p className="text-sm leading-relaxed text-muted-foreground">{perk.description}</p>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-        </motion.section>
+              <aside className={cn("rounded-md border p-5 sm:p-6", isHeroDark ? "border-dark-border bg-dark-surface" : "border-border bg-card")}>
+                <p className="text-xs font-semibold uppercase tracking-wide text-primary">Also exploring full-time roles?</p>
+                <h2 className={cn("mt-2 text-lg font-semibold", isHeroDark && "text-hero-fg")}>{content.careersLinkTitle}</h2>
+                <p className={cn("mt-2 text-sm leading-relaxed", isHeroDark ? "text-hero-fg/70" : "text-muted-foreground")}>{content.careersLinkBody}</p>
+                <ActionLink
+                  href={content.careersLinkHref}
+                  className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary/80"
+                >
+                  {content.careersLinkLabel} <ArrowRight className="h-4 w-4" />
+                </ActionLink>
+              </aside>
+            </motion.div>
+          </section>
+        ) : null}
 
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, delay: 0.1 }}
-          className="mt-12 sm:mt-16"
-        >
-          <h2 className="mb-6 text-xl font-bold sm:text-2xl">{content.positionsHeading}</h2>
+        <PageSectionsRenderer sections={getSectionsForPlacement(flexibleSections, "after-hero")} embedded surfaceMap={flexibleSectionSurfaces} />
 
-          {openings.length === 0 ? (
-            <div className="rounded-md border border-border p-5 sm:p-6">
-              <h3 className="mb-2 text-base font-semibold sm:text-lg">{content.noOpeningsTitle}</h3>
-              <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">{content.noOpeningsBody}</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {openings.map((internship, index) => {
-                const applyHref = internship.apply_url || content.applyButtonHref;
-                const closingDate = formatClosingDate(internship.closing_date);
+        {showProgramme ? (
+          <section className={pageSectionClass(programmeSurface)}>
+            <motion.section
+              id={programmeSection?.anchor}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: 0.05 }}
+              className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] sm:gap-16"
+            >
+              <div>
+                <h2 className={cn("mb-4 text-xl font-bold sm:text-2xl", isProgrammeDark && "text-hero-fg")}>{content.programHeading}</h2>
+                <div className="space-y-4">
+                  {content.programIntro.map((paragraph, index) => (
+                    <p
+                      key={`${paragraph}-${index}`}
+                      className={cn(
+                        index === 0 ? "text-base leading-relaxed sm:text-lg" : "text-sm leading-relaxed sm:text-base",
+                        isProgrammeDark ? "text-hero-fg/70" : "text-muted-foreground",
+                      )}
+                    >
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
 
-                return (
-                  <motion.div
-                    key={internship.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.18 + index * 0.06 }}
-                    className="rounded-md border border-border p-4 transition-colors hover:border-primary/30 sm:p-6"
-                  >
-                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                      <div>
-                        <h3 className="mb-2 text-base font-semibold sm:text-lg">{internship.title}</h3>
-                        <div className="mb-2 flex flex-wrap gap-3 text-sm text-muted-foreground sm:gap-4">
-                          <span className="inline-flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> {internship.type}</span>
-                          <span className="inline-flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> {internship.location}</span>
-                          {closingDate ? (
-                            <span className="inline-flex items-center gap-1.5"><CalendarDays className="h-3.5 w-3.5" /> Closes {closingDate}</span>
-                          ) : null}
-                        </div>
-                        <p className="text-sm text-muted-foreground">{internship.description}</p>
-                        {internship.requirements && internship.requirements.length > 0 ? (
-                          <div className="mt-4">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Requirements</p>
-                            <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
-                              {internship.requirements.filter(Boolean).map((requirement) => (
-                                <li key={requirement} className="flex items-start gap-2">
-                                  <span className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                                  <span>{requirement}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        ) : null}
-                      </div>
-                      <ActionLink
-                        href={applyHref}
-                        className="inline-flex flex-shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 sm:px-6"
+                <div className="mt-8 sm:mt-10">
+                  <h3 className={cn("mb-4 text-sm font-semibold uppercase tracking-wider", isProgrammeDark ? "text-hero-fg/60" : "text-muted-foreground")}>{content.preferredFieldsHeading}</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {content.preferredFields.map((field) => (
+                      <span
+                        key={field}
+                        className={cn(
+                          "rounded-md border px-3 py-2 text-xs sm:px-4 sm:text-sm",
+                          isProgrammeDark ? "border-dark-border text-hero-fg/70" : "border-border text-muted-foreground",
+                        )}
                       >
-                        Apply Now <ArrowRight className="h-4 w-4" />
-                      </ActionLink>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          )}
-        </motion.section>
+                        {field}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
 
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, delay: 0.15 }}
-          className="mt-12 rounded-md border border-border p-6 text-center sm:mt-16 sm:p-8 lg:p-12"
-        >
-          <h3 className="mb-3 text-lg font-bold sm:text-xl">{content.applicationCtaTitle}</h3>
-          <p className="mx-auto mb-6 max-w-md text-sm text-muted-foreground sm:text-base">{content.applicationCtaBody}</p>
-          <ActionLink
-            href={content.applyButtonHref}
-            className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 sm:px-8 sm:py-3.5"
-          >
-            {content.applyButtonLabel} <ArrowRight className="h-4 w-4" />
-          </ActionLink>
-        </motion.section>
+              <div>
+                <h2 className={cn("mb-6 text-xl font-bold sm:text-2xl", isProgrammeDark && "text-hero-fg")}>{content.perksHeading}</h2>
+                <div className="grid gap-4 sm:grid-cols-2 sm:gap-6">
+                  {content.internPerks.map((perk, index) => {
+                    const Icon = getIconByName(perk.iconName);
+                    return (
+                      <motion.div
+                        key={perk.title}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.08 + index * 0.06 }}
+                        className={cn(
+                          "rounded-md border p-5 transition-colors hover:border-primary/40 sm:p-6",
+                          isProgrammeDark ? "border-dark-border bg-dark-surface" : "border-border bg-background",
+                        )}
+                      >
+                        <Icon className="mb-3 h-6 w-6 text-primary sm:mb-4 sm:h-7 sm:w-7" />
+                        <h3 className={cn("mb-2 text-base font-semibold sm:text-lg", isProgrammeDark && "text-hero-fg")}>{perk.title}</h3>
+                        <p className={cn("text-sm leading-relaxed", isProgrammeDark ? "text-hero-fg/70" : "text-muted-foreground")}>{perk.description}</p>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </div>
+            </motion.section>
+          </section>
+        ) : null}
+
+        <PageSectionsRenderer sections={getSectionsForPlacement(flexibleSections, "after-programme")} embedded surfaceMap={flexibleSectionSurfaces} />
+
+        {showOpenings ? (
+          <section className={pageSectionClass(openingsSurface)}>
+            <motion.section
+              id={openingsSection?.anchor}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: 0.1 }}
+            >
+              <h2 className={cn("mb-6 text-xl font-bold sm:text-2xl", isOpeningsDark && "text-hero-fg")}>{content.positionsHeading}</h2>
+
+              {openings.length === 0 ? (
+                <div className={cn("rounded-md border p-5 sm:p-6", isOpeningsDark ? "border-dark-border bg-dark-surface" : "border-border bg-background")}>
+                  <h3 className={cn("mb-2 text-base font-semibold sm:text-lg", isOpeningsDark && "text-hero-fg")}>{content.noOpeningsTitle}</h3>
+                  <p className={cn("max-w-2xl text-sm leading-relaxed", isOpeningsDark ? "text-hero-fg/70" : "text-muted-foreground")}>{content.noOpeningsBody}</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {openings.map((internship, index) => {
+                    const applyHref = internship.apply_url || content.applyButtonHref;
+                    const closingDate = formatClosingDate(internship.closing_date);
+
+                    return (
+                      <motion.div
+                        key={internship.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.18 + index * 0.06 }}
+                        className={cn(
+                          "rounded-md border p-4 transition-colors hover:border-primary/30 sm:p-6",
+                          isOpeningsDark ? "border-dark-border bg-dark-surface" : "border-border bg-background",
+                        )}
+                      >
+                        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                          <div>
+                            <h3 className={cn("mb-2 text-base font-semibold sm:text-lg", isOpeningsDark && "text-hero-fg")}>{internship.title}</h3>
+                            <div className={cn("mb-2 flex flex-wrap gap-3 text-sm sm:gap-4", isOpeningsDark ? "text-hero-fg/70" : "text-muted-foreground")}>
+                              <span className="inline-flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> {internship.type}</span>
+                              <span className="inline-flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> {internship.location}</span>
+                              {closingDate ? (
+                                <span className="inline-flex items-center gap-1.5"><CalendarDays className="h-3.5 w-3.5" /> Closes {closingDate}</span>
+                              ) : null}
+                            </div>
+                            <p className={cn("text-sm", isOpeningsDark ? "text-hero-fg/70" : "text-muted-foreground")}>{internship.description}</p>
+                            {internship.requirements && internship.requirements.length > 0 ? (
+                              <div className="mt-4">
+                                <p className={cn("text-xs font-semibold uppercase tracking-wide", isOpeningsDark ? "text-hero-fg/60" : "text-muted-foreground")}>Requirements</p>
+                                <ul className={cn("mt-2 space-y-2 text-sm", isOpeningsDark ? "text-hero-fg/70" : "text-muted-foreground")}>
+                                  {internship.requirements.filter(Boolean).map((requirement) => (
+                                    <li key={requirement} className="flex items-start gap-2">
+                                      <span className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                                      <span>{requirement}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ) : null}
+                          </div>
+                          <ActionLink
+                            href={applyHref}
+                            className="inline-flex flex-shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 sm:px-6"
+                          >
+                            Apply Now <ArrowRight className="h-4 w-4" />
+                          </ActionLink>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )}
+            </motion.section>
+          </section>
+        ) : null}
+
+        <PageSectionsRenderer sections={getSectionsForPlacement(flexibleSections, "after-openings")} embedded surfaceMap={flexibleSectionSurfaces} />
+        <PageSectionsRenderer sections={getSectionsForPlacement(flexibleSections, "before-final-cta")} embedded surfaceMap={flexibleSectionSurfaces} />
+
+        {showApplicationCta ? (
+          <section className={pageSectionClass(applicationCtaSurface)}>
+            <motion.section
+              id={applicationCtaSection?.anchor}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: 0.15 }}
+              className={cn(
+                "rounded-md border p-6 text-center sm:p-8 lg:p-12",
+                isApplicationCtaDark ? "border-dark-border bg-dark-surface" : "border-border bg-background",
+              )}
+            >
+              <h3 className={cn("mb-3 text-lg font-bold sm:text-xl", isApplicationCtaDark && "text-hero-fg")}>{content.applicationCtaTitle}</h3>
+              <p className={cn("mx-auto mb-6 max-w-md text-sm sm:text-base", isApplicationCtaDark ? "text-hero-fg/70" : "text-muted-foreground")}>{content.applicationCtaBody}</p>
+              <ActionLink
+                href={content.applyButtonHref}
+                className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 sm:px-8 sm:py-3.5"
+              >
+                {content.applyButtonLabel} <ArrowRight className="h-4 w-4" />
+              </ActionLink>
+            </motion.section>
+          </section>
+        ) : null}
       </div>
     </div>
   );

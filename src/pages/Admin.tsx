@@ -8,6 +8,7 @@ import {
   GraduationCap,
   Home,
   Image,
+  LayoutTemplate,
   LayoutDashboard,
   LogOut,
   Milestone,
@@ -28,6 +29,7 @@ import { AdminDashboard } from "@/components/AdminDashboard";
 import { HomepageEditor, ContactEditor } from "@/components/AdminContentEditors";
 import { CareersPageEditor, CareerOpeningsEditor, InternshipOpeningsEditor, InternshipsPageEditor } from "@/components/AdminCareersEditor";
 import { MilestonesEditor, ServicesEditor } from "@/components/AdminDataEditors";
+import { PageSectionsEditor } from "@/components/AdminPageSectionsEditor";
 import { MediaEditor, NavigationEditor, SeoEditor, SettingsEditor, ThemeEditor } from "@/components/AdminUtilityEditors";
 
 type AdminSection =
@@ -40,6 +42,7 @@ type AdminSection =
   | "internships-page"
   | "internship-openings"
   | "contact"
+  | "page-sections"
   | "navigation"
   | "seo"
   | "media"
@@ -56,6 +59,7 @@ const adminSections: Array<{ id: AdminSection; label: string; description: strin
   { id: "internships-page", label: "Internships Page", description: "Dedicated internship programme page content", icon: GraduationCap },
   { id: "internship-openings", label: "Internship Openings", description: "Internship role listings and application links", icon: GraduationCap },
   { id: "contact", label: "Contact Info", description: "Email, office, LinkedIn, and contact page", icon: Contact },
+  { id: "page-sections", label: "Page Sections", description: "Add flexible sections to the existing public pages", icon: LayoutTemplate },
   { id: "navigation", label: "Navigation", description: "Header and footer links", icon: Navigation },
   { id: "seo", label: "SEO", description: "Meta titles and social sharing", icon: Search },
   { id: "media", label: "Media", description: "Upload and manage website assets", icon: Image },
@@ -223,6 +227,12 @@ const Admin = () => {
             <ContactEditor
               activePanel={activePanel}
               onSelectPanel={(panel) => goToSection("contact", panel)}
+            />
+          )}
+          {activeSection === "page-sections" && (
+            <PageSectionsEditor
+              activePanel={activePanel}
+              onSelectPanel={(panel) => goToSection("page-sections", panel)}
             />
           )}
           {activeSection === "navigation" && <NavigationEditor activePanel={activePanel} />}
